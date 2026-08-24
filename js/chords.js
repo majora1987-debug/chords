@@ -38,7 +38,11 @@ window.ChordUtils = (() => {
    */
   function parseChord(str) {
     if (!str) return null;
-    const m = str.match(/^([A-G][#b]?)(.*?)(?:\/([A-G][#b]?))?$/);
+    const clean = str.trim();
+    if (clean === 'N.C.' || clean === 'NC' || clean === '-') {
+      return { root: 'N.C.', quality: '', bass: null };
+    }
+    const m = clean.match(/^([A-G][#b]?)(.*?)(?:\/([A-G][#b]?))?$/);
     if (!m) return null;
     return { root: m[1], quality: m[2] || '', bass: m[3] || null };
   }
@@ -67,7 +71,8 @@ window.ChordUtils = (() => {
    * e.g. transposeChord("G", 2) → "A"
    */
   function transposeChord(str, semitones) {
-    if (!semitones) return str;
+    if (!semitones || !str) return str;
+    if (str === 'N.C.' || str === 'NC' || str === '-') return str;
     const p = parseChord(str);
     if (!p) return str;
     const useFlats = p.root.includes('b') || (p.bass && p.bass.includes('b'));
@@ -95,7 +100,7 @@ window.ChordUtils = (() => {
     song.sections.forEach(sec => {
       (sec.lines || []).forEach(line => {
         (line.chords || []).forEach(c => {
-          if (c.chord && c.chord.trim()) {
+          if (c.chord && c.chord.trim() && c.chord !== 'N.C.' && c.chord !== '-') {
             chords.push(c.chord.trim());
           }
         });
@@ -127,7 +132,7 @@ window.ChordUtils = (() => {
     function evaluateCandidate(candName, candRoot, isMinor) {
       let score = 0;
       
-      if (firstChordParsed) {
+      if (firstChordParsed && firstChordParsed.root !== 'N.C.') {
         const firstRootIdx = noteIndex(firstChordParsed.root);
         const firstIsMin = firstChordParsed.quality.startsWith('m') && !firstChordParsed.quality.startsWith('maj');
         if (firstRootIdx === candRoot && firstIsMin === isMinor) {
@@ -135,7 +140,7 @@ window.ChordUtils = (() => {
         }
       }
 
-      if (lastChordParsed) {
+      if (lastChordParsed && lastChordParsed.root !== 'N.C.') {
         const lastRootIdx = noteIndex(lastChordParsed.root);
         const lastIsMin = lastChordParsed.quality.startsWith('m') && !lastChordParsed.quality.startsWith('maj');
         if (lastRootIdx === candRoot && lastIsMin === isMinor) {
@@ -145,7 +150,7 @@ window.ChordUtils = (() => {
 
       chords.forEach(cStr => {
         const p = parseChord(cStr);
-        if (!p) return;
+        if (!p || p.root === 'N.C.') return;
         const rIdx = noteIndex(p.root);
         if (rIdx === -1) return;
         
@@ -185,8 +190,74 @@ window.ChordUtils = (() => {
   }
 
   /**
+   * Helper: check if a raw line represents an instrumental chord progression (e.g. "| G | Em | C | D | (x2)" or "G Em C D")
+   */
+  function tryParseInstrumentalLine(lineStr) {
+    if (!lineStr || !lineStr.trim()) return null;
+    let s = lineStr.trim();
+
+    // Check if there is a comment/repeat tag e.g. (x2), (x4), (solo), (repeat 3x), or after // or #
+    let comment = '';
+    const commentMatch = s.match(/(\([^\)]+\)|\[x\d+\]|x\d+|#.+|\/\/.+)$/i);
+    if (commentMatch) {
+      comment = commentMatch[0].trim();
+      s = s.substring(0, commentMatch.index).trim();
+    }
+
+    // Split by bar lines | or dashes or whitespace
+    const tokens = s
+      .split(/[|/\\,]+/)
+      .map(t => t.trim())
+      .filter(t => t.length > 0 && t !== '-');
+
+    if (tokens.length === 0) {
+      if (comment && lineStr.includes('|')) {
+        return { type: 'chords', chords: [{ chord: 'G' }], comment, lyrics: '' };
+      }
+      return null;
+    }
+
+    // Subdivide any space-separated tokens
+    const chordTokens = [];
+    tokens.forEach(t => {
+      const parts = t.split(/\s+/).filter(p => p.length > 0);
+      chordTokens.push(...parts);
+    });
+
+    if (chordTokens.length === 0) return null;
+
+    // Check if ALL tokens are valid chords or music symbols
+    const validChords = [];
+    for (const tok of chordTokens) {
+      const cleanTok = tok.replace(/^\[|\]$/g, '').trim();
+      if (cleanTok === '%' || cleanTok === 'N.C.' || cleanTok === 'NC' || cleanTok === '-') {
+        validChords.push(cleanTok);
+        continue;
+      }
+      const parsed = parseChord(cleanTok);
+      if (parsed) {
+        validChords.push(cleanTok);
+      } else {
+        // Contains regular words -> not a pure instrumental line
+        return null;
+      }
+    }
+
+    if (validChords.length > 0) {
+      return {
+        type: 'chords',
+        chords: validChords.map(c => ({ chord: c })),
+        comment: comment,
+        lyrics: ''
+      };
+    }
+
+    return null;
+  }
+
+  /**
    * Parse lyrics text into structured song sections.
-   * Supports plain lyrics, section headers [Verse 1], and bracketed chords [G]
+   * Supports plain lyrics, section headers [Verse 1], bracketed chords [G], and instrumental lines "| G | Em | C | D |".
    */
   function parseLyrics(text) {
     if (!text || !text.trim()) return [];
@@ -203,7 +274,7 @@ window.ChordUtils = (() => {
         if (rawLines.length > 0) {
           const firstLine = rawLines[0];
           const isBracketedHeader = firstLine.startsWith('[') && firstLine.endsWith(']') && !firstLine.includes(' ');
-          const isStandardHeader = /^(verse\s*\d*|chorus\s*\d*|bridge\s*\d*|intro|outro|solo|pre-chorus|hook|verse|chorus)$/i.test(firstLine);
+          const isStandardHeader = /^(verse\s*\d*|chorus\s*\d*|bridge\s*\d*|intro\s*\d*|outro\s*\d*|solo\s*\d*|break\s*\d*|pre-chorus\s*\d*|hook\s*\d*|verse|chorus|intro|outro|bridge|solo|interlude|instrumental|riff)$/i.test(firstLine);
           
           if (isBracketedHeader || isStandardHeader) {
             label = firstLine.replace(/^\[|\]$/g, '').trim();
@@ -212,6 +283,11 @@ window.ChordUtils = (() => {
         }
 
         const parsedLines = linesToProcess.map(lineStr => {
+          // 1. Try instrumental chord line detection
+          const inst = tryParseInstrumentalLine(lineStr);
+          if (inst) return inst;
+
+          // 2. Bracketed lyrics line
           if (lineStr.includes('[') && lineStr.includes(']')) {
             const chords = [];
             let cleanLine = '';
@@ -255,7 +331,7 @@ window.ChordUtils = (() => {
               chords: []
             };
           }
-        }).filter(l => l.lyrics.length > 0);
+        }).filter(l => (l.type === 'chords' && l.chords.length > 0) || (l.lyrics && l.lyrics.length > 0));
 
         return {
           label: label,
@@ -265,7 +341,7 @@ window.ChordUtils = (() => {
   }
 
   /**
-   * Convert a structured song back to text (plain lyrics or ChordPro with chords).
+   * Convert a structured song back to text (plain lyrics or ChordPro with chords & instrumental blocks).
    */
   function songToText(song, includeChords = true) {
     if (!song || !song.sections || song.sections.length === 0) return '';
@@ -276,6 +352,13 @@ window.ChordUtils = (() => {
         secStr += `[${sec.label.trim()}]\n`;
       }
       const linesStr = (sec.lines || []).map(line => {
+        if (line.type === 'chords') {
+          if (!includeChords) return '';
+          const chordList = (line.chords || []).map(c => c.chord || '-').filter(Boolean);
+          if (chordList.length === 0) return '| - |';
+          return '| ' + chordList.join(' | ') + ' |' + (line.comment ? ` ${line.comment}` : '');
+        }
+
         if (!includeChords || !line.chords || line.chords.length === 0) {
           return line.lyrics || '';
         }
@@ -284,7 +367,7 @@ window.ChordUtils = (() => {
           const chordObj = line.chords.find(c => c.wordIndex === wi);
           return (chordObj ? `[${chordObj.chord}]` : '') + w;
         }).join(' ');
-      }).join('\n');
+      }).filter(Boolean).join('\n');
 
       return secStr + linesStr;
     }).join('\n\n');
@@ -311,13 +394,10 @@ window.ChordUtils = (() => {
 
   /**
    * Move a section header (boundary) dynamically to a specific global line index.
-   * All lines before the target index go above the section header,
-   * and lines from the target index onwards remain below/inside it.
    */
   function moveSectionHeaderToLine(song, fromSectionIndex, targetGlobalLineIndex) {
     if (!song || !song.sections || song.sections.length === 0) return;
     
-    // 1. Flatten all lines and record initial header line boundaries
     const allLines = [];
     const headers = [];
     
@@ -334,15 +414,12 @@ window.ChordUtils = (() => {
       }
     });
 
-    // 2. Find the header that is being moved
     const movedHeader = headers.find(h => h.originalSecIdx === fromSectionIndex);
     if (!movedHeader) return;
     
-    // Bound target index
     const newIndex = Math.max(0, Math.min(targetGlobalLineIndex, allLines.length));
     movedHeader.startLineIndex = newIndex;
 
-    // 3. Sort headers by startLineIndex (stable sort preserving relative original order)
     headers.sort((a, b) => {
       if (a.startLineIndex !== b.startLineIndex) {
         return a.startLineIndex - b.startLineIndex;
@@ -350,10 +427,8 @@ window.ChordUtils = (() => {
       return a.originalSecIdx - b.originalSecIdx;
     });
 
-    // 4. Reconstruct song.sections
     const newSections = [];
     
-    // If lines exist before the first header, create an unlabelled top section
     if (headers[0].startLineIndex > 0) {
       newSections.push({
         label: '',
@@ -361,7 +436,6 @@ window.ChordUtils = (() => {
       });
     }
 
-    // Build each section between its header and the next
     for (let i = 0; i < headers.length; i++) {
       const start = headers[i].startLineIndex;
       const end = (i < headers.length - 1) ? headers[i + 1].startLineIndex : allLines.length;
@@ -376,7 +450,7 @@ window.ChordUtils = (() => {
   }
 
   /**
-   * Merge all sections into a single continuous lyrics block (keeping all lyrics and chords).
+   * Merge all sections into a single continuous block (keeping all lyrics and chords).
    */
   function mergeAllSections(song) {
     if (!song || !song.sections || song.sections.length <= 1) return;
@@ -398,17 +472,19 @@ window.ChordUtils = (() => {
    * Render a song into a container DOM element.
    *
    * Options:
-   *   transpose         — semitones to transpose (default 0)
-   *   editable          — if true, enables interactive editing
-   *   onWordClick       — callback(sectionIndex, lineIndex, wordIndex, slotElement)
-   *   onSongChanged     — callback() called whenever sections/lines/labels are modified
-   *   justDroppedSecIdx — optional index of section that was just dropped for settle animation
+   *   transpose           — semitones to transpose (default 0)
+   *   editable            — if true, enables interactive editing
+   *   onWordClick         — callback(sectionIndex, lineIndex, wordIndex, slotElement)
+   *   onMeasureChordClick — callback(sectionIndex, lineIndex, chordIndex, boxElement)
+   *   onSongChanged       — callback() called whenever sections/lines/labels are modified
+   *   justDroppedSecIdx   — optional index of section that was just dropped for settle animation
    */
   function renderSong(song, container, options = {}) {
     const {
       transpose = 0,
       editable = false,
       onWordClick = null,
+      onMeasureChordClick = null,
       onSongChanged = null,
       justDroppedSecIdx = null,
     } = options;
@@ -419,7 +495,7 @@ window.ChordUtils = (() => {
       if (editable) {
         const emptySec = document.createElement('div');
         emptySec.className = 'empty-sections-notice';
-        emptySec.innerHTML = `<p>No lyrics found. <button class="btn btn-sm btn-primary" id="add-first-sec-btn">+ Add Line</button></p>`;
+        emptySec.innerHTML = `<p>No lyrics or chords found. <button class="btn btn-sm btn-primary" id="add-first-sec-btn">+ Add Line</button></p>`;
         emptySec.querySelector('#add-first-sec-btn').addEventListener('click', () => {
           song.sections = [{ label: '', lines: [{ lyrics: 'Lyrics line here', chords: [] }] }];
           renderSong(song, container, options);
@@ -473,7 +549,6 @@ window.ChordUtils = (() => {
             const labelText = section.label || `Section ${si + 1}`;
             const lineCount = (section.lines || []).length;
 
-            // Create smooth Trello-style floating card
             const floatingCard = document.createElement('div');
             floatingCard.className = 'trello-drag-card';
             floatingCard.innerHTML = `
@@ -511,7 +586,6 @@ window.ChordUtils = (() => {
               lastX = moveEvent.clientX;
               lastY = moveEvent.clientY;
 
-              // Activate drag after 3px movement threshold
               if (!isDraggingActive) {
                 const dist = Math.hypot(moveEvent.clientX - startX, moveEvent.clientY - startY);
                 if (dist > 3) {
@@ -530,7 +604,6 @@ window.ChordUtils = (() => {
                 rafId = requestAnimationFrame(updateFloatingPosition);
               }
 
-              // Raycast to find target line under cursor
               floatingCard.style.display = 'none';
               const elemBelow = document.elementFromPoint(moveEvent.clientX, moveEvent.clientY);
               floatingCard.style.display = 'flex';
@@ -556,7 +629,6 @@ window.ChordUtils = (() => {
                     currentTargetLineIdx = gIdx + 1;
                   }
                 } else {
-                  // If hovering directly over a section header
                   const headerEl = elemBelow.closest('.section-header-row');
                   if (headerEl && container.contains(headerEl) && headerEl !== headerRow) {
                     const sec = headerEl.closest('.song-section');
@@ -617,7 +689,7 @@ window.ChordUtils = (() => {
           labelEl.classList.add('editable-label');
           if (!hasLabel) labelEl.classList.add('placeholder-label');
           labelEl.spellcheck = false;
-          labelEl.title = 'Click to edit section name';
+          labelEl.title = 'Click to edit section name (e.g. Intro, Verse 1, Chorus, Solo)';
           
           labelEl.addEventListener('focus', () => {
             if (!hasLabel) {
@@ -684,11 +756,29 @@ window.ChordUtils = (() => {
           });
           controls.appendChild(downBtn);
 
-          // Add Line
+          // Add Instrumental Chord Progression Bar
+          const addChordBarBtn = document.createElement('button');
+          addChordBarBtn.className = 'sec-ctrl-btn sec-add-bar-btn';
+          addChordBarBtn.innerHTML = '+ Chord Bar';
+          addChordBarBtn.title = 'Add an instrumental chord bar/progression (no lyrics)';
+          addChordBarBtn.addEventListener('click', () => {
+            if (!section.lines) section.lines = [];
+            section.lines.push({
+              type: 'chords',
+              chords: [{ chord: 'G' }, { chord: 'C' }],
+              comment: '',
+              lyrics: ''
+            });
+            renderSong(song, container, options);
+            if (onSongChanged) onSongChanged();
+          });
+          controls.appendChild(addChordBarBtn);
+
+          // Add Lyrics Line
           const addLineBtn = document.createElement('button');
           addLineBtn.className = 'sec-ctrl-btn';
-          addLineBtn.innerHTML = '+ Line';
-          addLineBtn.title = 'Add line to this section';
+          addLineBtn.innerHTML = '+ Lyrics';
+          addLineBtn.title = 'Add lyrics line to this section';
           addLineBtn.addEventListener('click', () => {
             if (!section.lines) section.lines = [];
             section.lines.push({ lyrics: 'New lyrics line', chords: [] });
@@ -697,12 +787,12 @@ window.ChordUtils = (() => {
           });
           controls.appendChild(addLineBtn);
 
-          // Remove Section Header (Preserving all lyrics)
+          // Remove Section Header (Preserving all lyrics & chords)
           if (hasLabel) {
             const removeLabelBtn = document.createElement('button');
             removeLabelBtn.className = 'sec-ctrl-btn';
             removeLabelBtn.innerHTML = '✕ Label';
-            removeLabelBtn.title = 'Remove section header (keeps all lyrics intact)';
+            removeLabelBtn.title = 'Remove section header (keeps all lines intact)';
             removeLabelBtn.addEventListener('click', () => {
               section.label = '';
               if (si > 0) {
@@ -719,7 +809,7 @@ window.ChordUtils = (() => {
           const delBtn = document.createElement('button');
           delBtn.className = 'sec-ctrl-btn sec-delete-btn';
           delBtn.innerHTML = '🗑️';
-          delBtn.title = 'Delete section and its lines';
+          delBtn.title = 'Delete section and all its lines';
           delBtn.addEventListener('click', () => {
             if (confirm(`Delete section "${section.label || 'Section ' + (si + 1)}" and its lines?`)) {
               song.sections.splice(si, 1);
@@ -739,6 +829,142 @@ window.ChordUtils = (() => {
       (section.lines || []).forEach((line, li) => {
         const currentGlobalLineIdx = globalLineCounter++;
 
+        // Case A: Instrumental Chord Bar Line
+        if (line.type === 'chords' || (!line.lyrics && line.chords && line.chords.length > 0)) {
+          const instLineEl = document.createElement('div');
+          instLineEl.className = 'song-line instrumental-line';
+          instLineEl.dataset.sectionIndex = si;
+          instLineEl.dataset.lineIndex = li;
+          instLineEl.dataset.globalLineIndex = currentGlobalLineIdx;
+
+          const grid = document.createElement('div');
+          grid.className = 'instrumental-grid';
+
+          const startDivider = document.createElement('span');
+          startDivider.className = 'bar-divider';
+          startDivider.textContent = '|';
+          grid.appendChild(startDivider);
+
+          const chordsList = line.chords || [];
+
+          chordsList.forEach((chordObj, ci) => {
+            const rawChord = chordObj.chord || 'C';
+            const displayChord = transpose
+              ? transposeChord(rawChord, transpose)
+              : rawChord;
+
+            const box = document.createElement('div');
+            box.className = 'chord-measure-box';
+            box.dataset.chordIndex = ci;
+
+            const chordSpan = document.createElement('span');
+            chordSpan.className = 'measure-chord';
+            chordSpan.textContent = displayChord;
+            box.appendChild(chordSpan);
+
+            if (editable) {
+              box.classList.add('editable');
+              box.title = 'Click to change chord';
+              box.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (onMeasureChordClick) {
+                  onMeasureChordClick(si, li, ci, box);
+                }
+              });
+            }
+
+            grid.appendChild(box);
+
+            const div = document.createElement('span');
+            div.className = 'bar-divider';
+            div.textContent = '|';
+            grid.appendChild(div);
+          });
+
+          // Add Chord Button in editable mode
+          if (editable) {
+            const addChordBtn = document.createElement('button');
+            addChordBtn.className = 'add-measure-chord-btn';
+            addChordBtn.innerHTML = '+';
+            addChordBtn.title = 'Add another chord to this bar';
+            addChordBtn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              line.chords.push({ chord: 'G' });
+              renderSong(song, container, options);
+              if (onSongChanged) onSongChanged();
+            });
+            grid.appendChild(addChordBtn);
+          }
+
+          // Optional comment / repeat tag e.g. "(x2)", "(Solo)", "(Fade)"
+          if (line.comment || editable) {
+            const commentSpan = document.createElement('span');
+            commentSpan.className = 'measure-comment';
+            commentSpan.textContent = line.comment || (editable ? '+ tag (e.g. x2)' : '');
+            if (!line.comment && editable) commentSpan.classList.add('placeholder-tag');
+
+            if (editable) {
+              commentSpan.contentEditable = 'true';
+              commentSpan.classList.add('editable');
+              commentSpan.title = 'Click to edit repeat tag/comment';
+
+              commentSpan.addEventListener('focus', () => {
+                if (!line.comment) {
+                  commentSpan.textContent = '';
+                  commentSpan.classList.remove('placeholder-tag');
+                }
+              });
+
+              commentSpan.addEventListener('blur', () => {
+                const val = commentSpan.textContent.trim();
+                line.comment = val;
+                if (!val) {
+                  commentSpan.textContent = '+ tag (e.g. x2)';
+                  commentSpan.classList.add('placeholder-tag');
+                }
+                if (onSongChanged) onSongChanged();
+              });
+
+              commentSpan.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  commentSpan.blur();
+                }
+              });
+            }
+
+            grid.appendChild(commentSpan);
+          }
+
+          instLineEl.appendChild(grid);
+
+          // Line actions
+          if (editable) {
+            const lineActions = document.createElement('span');
+            lineActions.className = 'line-actions';
+
+            const delLineBtn = document.createElement('button');
+            delLineBtn.className = 'line-action-btn';
+            delLineBtn.innerHTML = '✕';
+            delLineBtn.title = 'Delete chord bar line';
+            delLineBtn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              section.lines.splice(li, 1);
+              if (section.lines.length === 0 && song.sections.length > 1) {
+                song.sections.splice(si, 1);
+              }
+              renderSong(song, container, options);
+              if (onSongChanged) onSongChanged();
+            });
+            lineActions.appendChild(delLineBtn);
+            instLineEl.appendChild(lineActions);
+          }
+
+          secEl.appendChild(instLineEl);
+          return;
+        }
+
+        // Case B: Regular Lyrics Line
         const lineEl = document.createElement('div');
         lineEl.className = 'song-line';
         lineEl.dataset.sectionIndex = si;

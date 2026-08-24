@@ -595,6 +595,24 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    const addInstSecBtn = document.getElementById('add-instrumental-sec-btn');
+    if (addInstSecBtn) {
+        addInstSecBtn.addEventListener('click', () => {
+            if (!currentSong) currentSong = ChordUtils.createSong('', 'C');
+            if (!currentSong.sections) currentSong.sections = [];
+            currentSong.sections.push({
+                label: 'Intro',
+                lines: [{
+                    type: 'chords',
+                    chords: [{ chord: 'G' }, { chord: 'Em' }, { chord: 'C' }, { chord: 'D' }],
+                    comment: '(x2)',
+                    lyrics: ''
+                }]
+            });
+            renderCurrentSong();
+        });
+    }
+
     const mergeSectionsBtn = document.getElementById('merge-sections-btn');
     if (mergeSectionsBtn) {
         mergeSectionsBtn.addEventListener('click', () => {
@@ -616,19 +634,21 @@ document.addEventListener('DOMContentLoaded', () => {
         ChordUtils.renderSong(currentSong, songRenderContainer, {
             editable: true,
             onWordClick: handleWordClick,
+            onMeasureChordClick: handleMeasureChordClick,
             onSongChanged: () => {
-                // song object is modified in place
+                updateKeyDropdownDisplay();
             }
         });
     }
 
-    // Chord Picker Logic
+    // Active Chord Target: { type: 'word', si, li, wi, el } or { type: 'measure', si, li, ci, el }
+    let activeChordTarget = null;
+
     function handleWordClick(si, li, wi, slotEl) {
-        activeWordInfo = { si, li, wi, slotEl };
+        activeChordTarget = { type: 'word', si, li, wi, el: slotEl };
         
         // Remove active class from all
-        document.querySelectorAll('.chord-word').forEach(el => el.classList.remove('active-word'));
-        // Find the word element and add active
+        document.querySelectorAll('.chord-word, .chord-measure-box').forEach(el => el.classList.remove('active-word', 'active-measure'));
         const wordEl = slotEl.closest('.chord-word');
         if (wordEl) wordEl.classList.add('active-word');
 
@@ -650,17 +670,43 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         updatePickerUI();
+        positionPicker(slotEl);
+    }
 
-        // Position picker
-        const rect = slotEl.getBoundingClientRect();
+    function handleMeasureChordClick(si, li, ci, boxEl) {
+        activeChordTarget = { type: 'measure', si, li, ci, el: boxEl };
+
+        document.querySelectorAll('.chord-word, .chord-measure-box').forEach(el => el.classList.remove('active-word', 'active-measure'));
+        boxEl.classList.add('active-measure');
+
+        const section = currentSong.sections[si];
+        if (!section || !section.lines || !section.lines[li]) return;
+        const line = section.lines[li];
+        if (!line.chords) line.chords = [];
+
+        const chordObj = line.chords[ci];
+        if (chordObj && chordObj.chord) {
+            parseExistingChord(chordObj.chord);
+            removeChordBtn.classList.remove('hidden');
+        } else {
+            selectedRoot = '';
+            selectedQuality = '';
+            customChordInput.value = '';
+            removeChordBtn.classList.add('hidden');
+        }
+
+        updatePickerUI();
+        positionPicker(boxEl);
+    }
+
+    function positionPicker(targetEl) {
+        const rect = targetEl.getBoundingClientRect();
         chordPicker.style.top = `${window.scrollY + rect.bottom + 10}px`;
-        // Keep picker within screen bounds
         let left = rect.left;
         if (left + 330 > window.innerWidth) {
             left = window.innerWidth - 340;
         }
         chordPicker.style.left = `${Math.max(10, left)}px`;
-        
         chordPicker.classList.remove('hidden');
     }
 
@@ -739,16 +785,28 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function applyChord(chordStr) {
-        if (!activeWordInfo) return;
-        const { si, li, wi } = activeWordInfo;
-        const line = currentSong.sections[si].lines[li];
+        if (!activeChordTarget) return;
+        const { type, si, li } = activeChordTarget;
+        const section = currentSong.sections[si];
+        if (!section || !section.lines || !section.lines[li]) return;
+        const line = section.lines[li];
         if (!line.chords) line.chords = [];
-        
-        const existingIdx = line.chords.findIndex(c => c.wordIndex === wi);
-        if (existingIdx >= 0) {
-            line.chords[existingIdx].chord = chordStr;
-        } else {
-            line.chords.push({ wordIndex: wi, chord: chordStr });
+
+        if (type === 'word') {
+            const wi = activeChordTarget.wi;
+            const existingIdx = line.chords.findIndex(c => c.wordIndex === wi);
+            if (existingIdx >= 0) {
+                line.chords[existingIdx].chord = chordStr;
+            } else {
+                line.chords.push({ wordIndex: wi, chord: chordStr });
+            }
+        } else if (type === 'measure') {
+            const ci = activeChordTarget.ci;
+            if (line.chords[ci]) {
+                line.chords[ci].chord = chordStr;
+            } else {
+                line.chords.push({ chord: chordStr });
+            }
         }
         
         closePicker();
@@ -757,10 +815,27 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     removeChordBtn.addEventListener('click', () => {
-        if (!activeWordInfo) return;
-        const { si, li, wi } = activeWordInfo;
-        let chords = currentSong.sections[si].lines[li].chords;
-        currentSong.sections[si].lines[li].chords = chords.filter(c => c.wordIndex !== wi);
+        if (!activeChordTarget) return;
+        const { type, si, li } = activeChordTarget;
+        const section = currentSong.sections[si];
+        if (!section || !section.lines || !section.lines[li]) return;
+        const line = section.lines[li];
+
+        if (type === 'word') {
+            const wi = activeChordTarget.wi;
+            line.chords = (line.chords || []).filter(c => c.wordIndex !== wi);
+        } else if (type === 'measure') {
+            const ci = activeChordTarget.ci;
+            if (line.chords) {
+                line.chords.splice(ci, 1);
+                if (line.chords.length === 0) {
+                    section.lines.splice(li, 1);
+                    if (section.lines.length === 0 && currentSong.sections.length > 1) {
+                        currentSong.sections.splice(si, 1);
+                    }
+                }
+            }
+        }
         
         closePicker();
         updateKeyDropdownDisplay();
@@ -771,15 +846,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function closePicker() {
         chordPicker.classList.add('hidden');
-        document.querySelectorAll('.chord-word').forEach(el => el.classList.remove('active-word'));
-        activeWordInfo = null;
+        document.querySelectorAll('.chord-word, .chord-measure-box').forEach(el => el.classList.remove('active-word', 'active-measure'));
+        activeChordTarget = null;
     }
 
     // Close picker when clicking outside
     document.addEventListener('click', (e) => {
         if (!chordPicker.classList.contains('hidden') && 
             !chordPicker.contains(e.target) && 
-            !e.target.closest('.chord-word')) {
+            !e.target.closest('.chord-word') &&
+            !e.target.closest('.chord-measure-box')) {
             closePicker();
         }
     });
