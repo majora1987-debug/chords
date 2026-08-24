@@ -277,9 +277,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const headers = {
             'Authorization': `Bearer ${cleanPat}`,
             'Accept': 'application/vnd.github.v3+json',
-            'Content-Type': 'application/json',
-            'Cache-Control': 'no-cache, no-store, must-revalidate',
-            'Pragma': 'no-cache'
+            'Content-Type': 'application/json'
         };
 
         const config = { method, headers };
