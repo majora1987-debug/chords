@@ -160,6 +160,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const config = { method, headers };
         if (body) {
             body.branch = s.branch;
+            // Clean up any null or undefined properties so GitHub API never receives "sha: null"
+            Object.keys(body).forEach(key => {
+                if (body[key] === null || body[key] === undefined) {
+                    delete body[key];
+                }
+            });
             config.body = JSON.stringify(body);
         } else if (method === 'GET' || method === 'DELETE') {
             const urlObj = new URL(url);
