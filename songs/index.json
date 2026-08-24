@@ -13,6 +13,13 @@
       "key": "",
       "file": "songs/lamborghini.json",
       "artist": "The Red Ram"
+    },
+    {
+      "title": "Rock n roll radio",
+      "slug": "rock-n-roll-radio",
+      "key": "",
+      "file": "songs/rock-n-roll-radio.json",
+      "artist": "The Red Ram"
     }
   ]
 }
