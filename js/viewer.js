@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Fetch Songs
     async function loadSongs() {
         try {
-            const response = await fetch('songs/index.json');
+            const response = await fetch('songs/index.json?t=' + Date.now());
             if (!response.ok) {
                 throw new Error('No songs found or index missing');
             }
@@ -131,6 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
             loadSongDetail(slug);
         } else {
             showListView();
+            loadSongs();
         }
     }
 
@@ -152,12 +153,18 @@ document.addEventListener('DOMContentLoaded', () => {
     async function loadSongDetail(slug) {
         const songMeta = state.songs.find(s => s.slug === slug);
         if (!songMeta) {
-            window.location.hash = '#/';
-            return;
+            // Try loading fresh songs index if not found yet
+            await loadSongs();
+            const recheck = state.songs.find(s => s.slug === slug);
+            if (!recheck) {
+                window.location.hash = '#/';
+                return;
+            }
+            return loadSongDetail(slug);
         }
 
         try {
-            const response = await fetch(songMeta.file);
+            const response = await fetch(`${songMeta.file}?t=${Date.now()}`);
             if (!response.ok) throw new Error('Song file not found');
             const songData = await response.json();
             
