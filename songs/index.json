@@ -1,6 +1,13 @@
 {
   "songs": [
     {
+      "title": "A Night Out",
+      "slug": "a-night-out",
+      "key": "",
+      "file": "songs/a-night-out.json",
+      "artist": "The Red Ram"
+    },
+    {
       "title": "Dirty Daisy",
       "slug": "dirty-daisy",
       "key": "",

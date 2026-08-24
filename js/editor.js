@@ -265,7 +265,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     saveSettingsBtn.addEventListener('click', saveSettings);
 
-    // GitHub API Helper
+    // GitHub API Helper with Cache-Busting
     async function githubApi(method, path, body = null) {
         const s = getSettings();
         const cleanPat = (s.pat || '').trim().replace(/^['"]|['"]$/g, '');
@@ -277,7 +277,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const headers = {
             'Authorization': `Bearer ${cleanPat}`,
             'Accept': 'application/vnd.github.v3+json',
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache'
         };
 
         const config = { method, headers };
@@ -292,6 +294,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (method === 'GET' || method === 'DELETE') {
             const urlObj = new URL(url);
             urlObj.searchParams.append('ref', s.branch);
+            urlObj.searchParams.append('_t', Date.now().toString());
             config.url = urlObj.toString();
         }
 
@@ -304,7 +307,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error("GitHub Authentication Failed (401 Bad Credentials): Please verify your PAT in Settings.");
             }
             const errText = await res.text();
-            throw new Error(`GitHub API Error (${res.status}): ${errText}`);
+            const err = new Error(`GitHub API Error (${res.status}): ${errText}`);
+            err.status = res.status;
+            throw err;
         }
         
         return await res.json();
@@ -620,74 +625,106 @@ document.addEventListener('DOMContentLoaded', () => {
             const songContent = JSON.stringify(currentSong, null, 2);
             const encodedContent = btoa(unescape(encodeURIComponent(songContent)));
             
-            let fileSha = currentSongSha;
-            try {
-                const existing = await githubApi('GET', `songs/${slug}.json`);
-                if (existing && existing.sha) {
-                    fileSha = existing.sha;
-                }
-            } catch (err) {
-                console.log('No existing song file on GitHub:', err);
-            }
+            // 1. Save Song File with automatic conflict retry
+            let songSaved = false;
+            let songAttempts = 0;
+            const maxAttempts = 3;
 
-            const putBody = {
-                message: `Update song ${currentSong.title}`,
-                content: encodedContent
-            };
-            if (fileSha) {
-                putBody.sha = fileSha;
-            }
+            while (!songSaved && songAttempts < maxAttempts) {
+                songAttempts++;
+                try {
+                    let fileSha = currentSongSha;
+                    try {
+                        const existing = await githubApi('GET', `songs/${slug}.json`);
+                        if (existing && existing.sha) {
+                            fileSha = existing.sha;
+                        }
+                    } catch (err) {
+                        console.log('No existing song file on GitHub:', err);
+                    }
 
-            const saveRes = await githubApi('PUT', `songs/${slug}.json`, putBody);
-            if (saveRes && saveRes.content && saveRes.content.sha) {
-                currentSongSha = saveRes.content.sha;
-            }
+                    const putBody = {
+                        message: `Update song ${currentSong.title}`,
+                        content: encodedContent
+                    };
+                    if (fileSha) {
+                        putBody.sha = fileSha;
+                    }
 
-            // Update index.json on GitHub
-            let indexSongs = [];
-            let indexSha = null;
-
-            try {
-                const liveIndexData = await githubApi('GET', 'songs/index.json');
-                if (liveIndexData) {
-                    indexSha = liveIndexData.sha;
-                    if (liveIndexData.content) {
-                        const raw = decodeURIComponent(escape(atob(liveIndexData.content.replace(/\s/g, ''))));
-                        const parsed = JSON.parse(raw);
-                        indexSongs = Array.isArray(parsed) ? parsed : (parsed.songs || []);
+                    const saveRes = await githubApi('PUT', `songs/${slug}.json`, putBody);
+                    if (saveRes && saveRes.content && saveRes.content.sha) {
+                        currentSongSha = saveRes.content.sha;
+                    }
+                    songSaved = true;
+                } catch (songErr) {
+                    if (songErr.status === 409 && songAttempts < maxAttempts) {
+                        console.log(`Song file conflict (409), retrying attempt ${songAttempts + 1}...`);
+                        await new Promise(r => setTimeout(r, 400));
+                    } else {
+                        throw songErr;
                     }
                 }
-            } catch (err) {
-                const localIndex = await getIndexJson();
-                indexSongs = localIndex.songs || [];
             }
 
-            const indexEntry = {
-                title: currentSong.title,
-                slug: slug,
-                key: currentSong.key,
-                file: `songs/${slug}.json`,
-                artist: currentSong.artist || 'The Red Ram'
-            };
+            // 2. Resilient Index Update with 409 Conflict Retry
+            let indexSaved = false;
+            let indexAttempts = 0;
 
-            const existingIdx = indexSongs.findIndex(item => item.slug === slug);
-            if (existingIdx >= 0) {
-                indexSongs[existingIdx] = indexEntry;
-            } else {
-                indexSongs.push(indexEntry);
-                indexSongs.sort((a,b) => a.title.localeCompare(b.title));
+            while (!indexSaved && indexAttempts < maxAttempts) {
+                indexAttempts++;
+                try {
+                    let indexSongs = [];
+                    let indexSha = null;
+
+                    const liveIndexData = await githubApi('GET', 'songs/index.json');
+                    if (liveIndexData) {
+                        indexSha = liveIndexData.sha;
+                        if (liveIndexData.content) {
+                            const raw = decodeURIComponent(escape(atob(liveIndexData.content.replace(/\s/g, ''))));
+                            const parsed = JSON.parse(raw);
+                            indexSongs = Array.isArray(parsed) ? parsed : (parsed.songs || []);
+                        }
+                    } else {
+                        const localIndex = await getIndexJson();
+                        indexSongs = localIndex.songs || [];
+                    }
+
+                    const indexEntry = {
+                        title: currentSong.title,
+                        slug: slug,
+                        key: currentSong.key,
+                        file: `songs/${slug}.json`,
+                        artist: currentSong.artist || 'The Red Ram'
+                    };
+
+                    const existingIdx = indexSongs.findIndex(item => item.slug === slug);
+                    if (existingIdx >= 0) {
+                        indexSongs[existingIdx] = indexEntry;
+                    } else {
+                        indexSongs.push(indexEntry);
+                        indexSongs.sort((a,b) => a.title.localeCompare(b.title));
+                    }
+
+                    const indexPayload = JSON.stringify({ songs: indexSongs }, null, 2);
+                    const indexPutBody = {
+                        message: `Update index for ${currentSong.title}`,
+                        content: btoa(unescape(encodeURIComponent(indexPayload)))
+                    };
+                    if (indexSha) {
+                        indexPutBody.sha = indexSha;
+                    }
+
+                    await githubApi('PUT', 'songs/index.json', indexPutBody);
+                    indexSaved = true;
+                } catch (indexErr) {
+                    if (indexErr.status === 409 && indexAttempts < maxAttempts) {
+                        console.log(`Index update conflict (409), retrying attempt ${indexAttempts + 1}...`);
+                        await new Promise(r => setTimeout(r, 400));
+                    } else {
+                        throw indexErr;
+                    }
+                }
             }
-
-            const indexPayload = JSON.stringify({ songs: indexSongs }, null, 2);
-            const indexPutBody = {
-                message: `Update index for ${currentSong.title}`,
-                content: btoa(unescape(encodeURIComponent(indexPayload)))
-            };
-            if (indexSha) {
-                indexPutBody.sha = indexSha;
-            }
-
-            await githubApi('PUT', 'songs/index.json', indexPutBody);
 
             saveStatus.textContent = '✅ Saved to GitHub successfully!';
             saveStatus.style.color = '#27ae60';
