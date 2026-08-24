@@ -1,0 +1,17 @@
+{
+  "name": "The Red Ram — Chords & Setlists",
+  "short_name": "Red Ram Chords",
+  "description": "Band chord charts, lyrics, and teleprompter for The Red Ram",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#090d16",
+  "theme_color": "#e11d48",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "img/logo.jpg",
+      "sizes": "192x192 512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}

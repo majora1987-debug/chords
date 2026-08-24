@@ -1,5 +1,5 @@
 // js/theme.js
-// Handles Light / Dark theme toggling and persistence
+// Handles Light / Dark theme toggling and persistence with SVG icons
 
 (() => {
   function getPreferredTheme() {
@@ -15,8 +15,13 @@
     // Update all theme toggle buttons on the page
     const toggleBtns = document.querySelectorAll('.theme-toggle-btn');
     toggleBtns.forEach(btn => {
-      btn.innerHTML = theme === 'dark' ? '☀️' : '🌙';
+      if (window.UI && typeof window.UI.icon === 'function') {
+        btn.innerHTML = theme === 'dark' ? window.UI.icon('sun') : window.UI.icon('moon');
+      } else {
+        btn.innerHTML = theme === 'dark' ? '☀️' : '🌙';
+      }
       btn.title = theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode';
+      btn.setAttribute('aria-label', btn.title);
     });
   }
 

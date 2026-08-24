@@ -1,4 +1,6 @@
 // js/editor.js
+// Comprehensive Studio Editor Logic for The Red Ram chords application.
+// Undo/Redo, P0 Bug Fix, Modal Settings, Soft-Delete, Smart Chord Picker & Toast Notifications.
 
 document.addEventListener('DOMContentLoaded', () => {
     // Security & Auth Gate (Salted SHA-256)
@@ -26,6 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
             authGate.classList.add('hidden');
             editorApp.classList.remove('hidden');
             loadSettings();
+            updateConnectionStatus();
             loadSongList();
         } else {
             authGate.classList.remove('hidden');
@@ -47,6 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (computedHash === EXPECTED_HASH) {
                 localStorage.setItem('redram-auth', computedHash);
                 checkAuth();
+                if (window.UI) window.UI.toast('Welcome to The Red Ram Studio Editor', { type: 'success' });
             } else {
                 authErrorMsg.classList.remove('hidden');
                 adminPasswordInput.value = '';
@@ -59,27 +63,87 @@ document.addEventListener('DOMContentLoaded', () => {
         lockEditorBtn.addEventListener('click', () => {
             localStorage.removeItem('redram-auth');
             checkAuth();
+            if (window.UI) window.UI.toast('Editor locked', { type: 'info' });
         });
     }
 
-    // State
+    // State & History Stack
+    let rawSongList = [];
     let currentSong = null;
     let currentSongSha = null;
-    let activeWordInfo = null; // { si, li, wi, slotEl }
+    let activeChordTarget = null; // { type: 'word' | 'measure', si, li, wi/ci, el }
+
+    // Undo / Redo History
+    let historyStack = [];
+    let historyIndex = -1;
+    const MAX_HISTORY = 40;
+
+    function pushHistoryState() {
+        if (!currentSong) return;
+        // Prune future if we branched
+        if (historyIndex < historyStack.length - 1) {
+            historyStack = historyStack.slice(0, historyIndex + 1);
+        }
+        historyStack.push(ChordUtils.cloneSong(currentSong));
+        if (historyStack.length > MAX_HISTORY) {
+            historyStack.shift();
+        } else {
+            historyIndex++;
+        }
+        updateHistoryButtons();
+    }
+
+    function undo() {
+        if (historyIndex > 0) {
+            historyIndex--;
+            currentSong = ChordUtils.cloneSong(historyStack[historyIndex]);
+            songTitleInput.value = currentSong.title || '';
+            songKeyInput.value = currentSong.key || 'auto';
+            updateKeyDropdownDisplay();
+            renderCurrentSong(false);
+            updateHistoryButtons();
+            if (window.UI) window.UI.toast('Undo', { type: 'info', duration: 1500 });
+        }
+    }
+
+    function redo() {
+        if (historyIndex < historyStack.length - 1) {
+            historyIndex++;
+            currentSong = ChordUtils.cloneSong(historyStack[historyIndex]);
+            songTitleInput.value = currentSong.title || '';
+            songKeyInput.value = currentSong.key || 'auto';
+            updateKeyDropdownDisplay();
+            renderCurrentSong(false);
+            updateHistoryButtons();
+            if (window.UI) window.UI.toast('Redo', { type: 'info', duration: 1500 });
+        }
+    }
+
+    function updateHistoryButtons() {
+        if (undoBtn) undoBtn.disabled = historyIndex <= 0;
+        if (redoBtn) redoBtn.disabled = historyIndex >= historyStack.length - 1;
+    }
 
     // Elements
-    const settingsPanel = document.getElementById('settings-panel');
+    const ghConnStatus = document.getElementById('gh-conn-status');
+    const settingsModal = document.getElementById('settings-modal');
     const toggleSettingsBtn = document.getElementById('toggle-settings-btn');
+    const closeSettingsBtn = document.getElementById('close-settings-btn');
     const saveSettingsBtn = document.getElementById('save-settings-btn');
-    const settingsStatus = document.getElementById('settings-status');
 
     const viewList = document.getElementById('editor-song-list');
     const viewEditor = document.getElementById('editor-view');
     const songListContainer = document.getElementById('song-list-container');
+    const editorSearchInput = document.getElementById('editor-search');
+    const editorSortSelect = document.getElementById('editor-sort-select');
+    const editorSongCount = document.getElementById('editor-song-count');
     const newSongBtn = document.getElementById('new-song-btn');
 
     const songTitleInput = document.getElementById('song-title');
     const songKeyInput = document.getElementById('song-key');
+    const undoBtn = document.getElementById('undo-btn');
+    const redoBtn = document.getElementById('redo-btn');
+
     const lyricsInput = document.getElementById('lyrics-input');
     const formatLyricsBtn = document.getElementById('format-lyrics-btn');
     const songRenderContainer = document.getElementById('song-render-container');
@@ -105,6 +169,41 @@ document.addEventListener('DOMContentLoaded', () => {
     let selectedRoot = '';
     let selectedQuality = '';
 
+    // Populate SVG Icon Slots
+    if (window.UI && typeof window.UI.icon === 'function') {
+        const backIcon = document.querySelector('.back-icon-slot');
+        if (backIcon) backIcon.innerHTML = window.UI.icon('back');
+
+        const settingsIcon = document.querySelector('.settings-icon-slot');
+        if (settingsIcon) settingsIcon.innerHTML = window.UI.icon('settings');
+
+        const lockIcon = document.querySelector('.lock-icon-slot');
+        if (lockIcon) lockIcon.innerHTML = window.UI.icon('lock');
+
+        const closeSettings = document.getElementById('close-settings-btn');
+        if (closeSettings) closeSettings.innerHTML = window.UI.icon('close');
+
+        const plusIcon = document.querySelector('.plus-icon-slot');
+        if (plusIcon) plusIcon.innerHTML = window.UI.icon('plus');
+
+        const searchIcon = document.querySelector('.search-icon-slot');
+        if (searchIcon) searchIcon.innerHTML = window.UI.icon('search');
+
+        const undoIcon = document.querySelector('.undo-icon-slot');
+        if (undoIcon) undoIcon.innerHTML = window.UI.icon('undo');
+
+        const redoIcon = document.querySelector('.redo-icon-slot');
+        if (redoIcon) redoIcon.innerHTML = window.UI.icon('redo');
+
+        const tabLyrics = document.querySelector('.tab-icon-lyrics');
+        if (tabLyrics) tabLyrics.innerHTML = window.UI.icon('note');
+
+        const tabGuitar = document.querySelector('.tab-icon-guitar');
+        if (tabGuitar) tabGuitar.innerHTML = window.UI.icon('guitar');
+
+        if (closePickerBtn) closePickerBtn.innerHTML = window.UI.icon('close');
+    }
+
     // Settings Management
     function loadSettings() {
         const stored = localStorage.getItem('redram-editor-settings');
@@ -126,18 +225,42 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
+    function updateConnectionStatus() {
+        const s = getSettings();
+        if (ghConnStatus) {
+            const dot = ghConnStatus.querySelector('.status-dot');
+            const text = ghConnStatus.querySelector('.status-text');
+            if (s.pat) {
+                dot.className = 'status-dot connected';
+                text.textContent = 'GitHub Connected';
+            } else {
+                dot.className = 'status-dot disconnected';
+                text.textContent = 'PAT Not Set';
+            }
+        }
+    }
+
     function saveSettings() {
         const s = getSettings();
         localStorage.setItem('redram-editor-settings', JSON.stringify(s));
-        settingsStatus.textContent = 'Settings saved!';
-        settingsStatus.style.color = '#27ae60';
-        setTimeout(() => settingsStatus.textContent = '', 3000);
-        // Reload songs after changing settings
+        updateConnectionStatus();
+        settingsModal.classList.add('hidden');
+        if (window.UI) window.UI.toast('GitHub settings saved!', { type: 'success' });
         loadSongList();
     }
 
     toggleSettingsBtn.addEventListener('click', () => {
-        settingsPanel.classList.toggle('hidden');
+        settingsModal.classList.remove('hidden');
+    });
+
+    closeSettingsBtn.addEventListener('click', () => {
+        settingsModal.classList.add('hidden');
+    });
+
+    settingsModal.addEventListener('click', (e) => {
+        if (e.target === settingsModal) {
+            settingsModal.classList.add('hidden');
+        }
     });
 
     saveSettingsBtn.addEventListener('click', saveSettings);
@@ -147,7 +270,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const s = getSettings();
         const cleanPat = (s.pat || '').trim().replace(/^['"]|['"]$/g, '');
         if (!cleanPat) {
-            throw new Error("GitHub PAT not configured. Please click ⚙️ Settings at the top to configure your Personal Access Token.");
+            throw new Error("GitHub PAT not configured. Click ⚙️ Settings at the top to configure your Personal Access Token.");
         }
         
         const url = `https://api.github.com/repos/${s.owner}/${s.repo}/contents/${path}`;
@@ -160,7 +283,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const config = { method, headers };
         if (body) {
             body.branch = s.branch;
-            // Clean up any null or undefined properties so GitHub API never receives "sha: null"
             Object.keys(body).forEach(key => {
                 if (body[key] === null || body[key] === undefined) {
                     delete body[key];
@@ -179,7 +301,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!res.ok) {
             if (res.status === 404) return null;
             if (res.status === 401) {
-                throw new Error("GitHub Authentication Failed (401 Bad Credentials): Please check your GitHub Personal Access Token in ⚙️ Settings. (Make sure it has the 'repo' scope).");
+                throw new Error("GitHub Authentication Failed (401 Bad Credentials): Please verify your PAT in Settings.");
             }
             const errText = await res.text();
             throw new Error(`GitHub API Error (${res.status}): ${errText}`);
@@ -188,9 +310,8 @@ document.addEventListener('DOMContentLoaded', () => {
         return await res.json();
     }
 
-    // Load Index (tries local/static fetch first, then GitHub API if needed)
+    // Load Index
     async function getIndexJson() {
-        // 1. Try direct fetch (works on local server and GitHub Pages without PAT)
         try {
             const res = await fetch('songs/index.json?t=' + Date.now());
             if (res.ok) {
@@ -199,10 +320,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 return { songs, sha: null };
             }
         } catch (e) {
-            console.log('Local fetch songs/index.json failed, falling back to GitHub API:', e);
+            console.log('Local fetch songs/index.json failed:', e);
         }
 
-        // 2. Fallback to GitHub API if PAT is configured
         const s = getSettings();
         if (s.pat) {
             const data = await githubApi('GET', 'songs/index.json');
@@ -222,41 +342,77 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('loading-songs').classList.remove('hidden');
         try {
             const indexData = await getIndexJson();
-            const songs = indexData.songs || [];
-            
+            rawSongList = indexData.songs || [];
             document.getElementById('loading-songs').classList.add('hidden');
-            if (songs.length === 0) {
-                songListContainer.innerHTML = '<p class="empty-msg">No songs found yet. Click "New Song" to add one!</p>';
-                return;
-            }
-
-            songs.forEach(s => {
-                const card = document.createElement('div');
-                card.className = 'song-card';
-                card.innerHTML = `
-                    <div class="song-info">
-                        <strong>${s.title}</strong>
-                        ${s.key ? `<span class="badge">Key: ${s.key}</span>` : ''}
-                    </div>
-                    <div class="song-card-actions">
-                        <button class="btn btn-sm secondary-btn edit-btn" data-slug="${s.slug}">Edit</button>
-                        <button class="btn btn-sm danger-btn delete-btn" data-slug="${s.slug}">Delete</button>
-                    </div>
-                `;
-                songListContainer.appendChild(card);
-            });
-
-            // Bind events
-            songListContainer.querySelectorAll('.edit-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => editSong(e.currentTarget.dataset.slug));
-            });
-            songListContainer.querySelectorAll('.delete-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => deleteSongFromList(e.currentTarget.dataset.slug));
-            });
+            renderEditorSongGrid();
         } catch (e) {
             document.getElementById('loading-songs').classList.add('hidden');
-            songListContainer.innerHTML = `<p style="color:#c0392b">Error loading songs: ${e.message}</p>`;
+            songListContainer.innerHTML = `<p style="color:#c0392b">Error loading repertoire: ${e.message}</p>`;
         }
+    }
+
+    function renderEditorSongGrid() {
+        const query = (editorSearchInput ? editorSearchInput.value : '').toLowerCase().trim();
+        const sortMode = editorSortSelect ? editorSortSelect.value : 'title-asc';
+
+        let filtered = rawSongList.filter(s => 
+            s.title.toLowerCase().includes(query) || 
+            (s.key && s.key.toLowerCase().includes(query))
+        );
+
+        if (sortMode === 'title-asc') {
+            filtered.sort((a,b) => a.title.localeCompare(b.title));
+        } else if (sortMode === 'title-desc') {
+            filtered.sort((a,b) => b.title.localeCompare(a.title));
+        } else if (sortMode === 'key') {
+            filtered.sort((a,b) => (a.key || 'Z').localeCompare(b.key || 'Z'));
+        }
+
+        if (editorSongCount) {
+            editorSongCount.textContent = `${filtered.length} song${filtered.length === 1 ? '' : 's'}`;
+        }
+
+        songListContainer.innerHTML = '';
+        if (filtered.length === 0) {
+            songListContainer.innerHTML = '<p class="empty-msg">No songs match your search. Click "New Song" to add one!</p>';
+            return;
+        }
+
+        filtered.forEach(s => {
+            const card = document.createElement('div');
+            card.className = 'song-card';
+            
+            const highlightedTitle = window.UI && typeof window.UI.highlightMatches === 'function'
+                ? window.UI.highlightMatches(s.title, query)
+                : s.title;
+
+            card.innerHTML = `
+                <div class="song-info">
+                    <strong>${highlightedTitle}</strong>
+                    ${s.key ? `<span class="badge badge-key">Key: ${s.key}</span>` : '<span class="badge badge-lyrics">Key not set</span>'}
+                </div>
+                <div class="song-card-actions">
+                    <button class="btn btn-sm secondary-btn edit-btn" data-slug="${s.slug}">Edit</button>
+                    <button class="btn btn-sm danger-btn delete-btn" data-slug="${s.slug}">Delete</button>
+                </div>
+            `;
+            songListContainer.appendChild(card);
+        });
+
+        // Bind events
+        songListContainer.querySelectorAll('.edit-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => editSong(e.currentTarget.dataset.slug));
+        });
+        songListContainer.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => deleteSongFromList(e.currentTarget.dataset.slug));
+        });
+    }
+
+    if (editorSearchInput) {
+        editorSearchInput.addEventListener('input', renderEditorSongGrid);
+    }
+    if (editorSortSelect) {
+        editorSortSelect.addEventListener('change', renderEditorSongGrid);
     }
 
     async function editSong(slug) {
@@ -264,7 +420,6 @@ document.addEventListener('DOMContentLoaded', () => {
             let songData = null;
             let sha = null;
 
-            // 1. Try local/static fetch first
             try {
                 const res = await fetch(`songs/${slug}.json?t=` + Date.now());
                 if (res.ok) {
@@ -274,7 +429,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.log('Local fetch failed for song:', slug);
             }
 
-            // 2. If not found or if PAT is set, try GitHub API to get data and SHA
             const s = getSettings();
             if (!songData && s.pat) {
                 const data = await githubApi('GET', `songs/${slug}.json`);
@@ -291,6 +445,11 @@ document.addEventListener('DOMContentLoaded', () => {
             
             currentSong = songData;
             currentSongSha = sha;
+
+            // Reset history
+            historyStack = [ChordUtils.cloneSong(currentSong)];
+            historyIndex = 0;
+            updateHistoryButtons();
             
             showEditorView();
             songTitleInput.value = currentSong.title || '';
@@ -298,24 +457,33 @@ document.addEventListener('DOMContentLoaded', () => {
             updateKeyDropdownDisplay();
             
             switchTab('edit-mode');
-            renderCurrentSong();
+            renderCurrentSong(false);
         } catch (e) {
-            alert(`Failed to load song: ${e.message}`);
+            if (window.UI) window.UI.toast(`Failed to load song: ${e.message}`, { type: 'error' });
+            else alert(`Failed to load song: ${e.message}`);
         }
     }
 
     async function deleteSongFromList(slug) {
         const s = getSettings();
         if (!s.pat) {
-            alert('To delete directly from GitHub, please configure your GitHub PAT in ⚙️ Settings.');
-            settingsPanel.classList.remove('hidden');
+            if (window.UI) {
+                window.UI.toast('Please configure your GitHub PAT in Settings to delete from repo.', { type: 'warning' });
+            }
+            settingsModal.classList.remove('hidden');
             return;
         }
 
-        if (!confirm(`Are you sure you want to delete "${slug}"?`)) return;
+        let confirmed = false;
+        if (window.UI && typeof window.UI.confirm === 'function') {
+            confirmed = await window.UI.confirm('Delete Song', `Are you sure you want to delete "${slug}"? This removes the chart from GitHub.`, true);
+        } else {
+            confirmed = confirm(`Are you sure you want to delete "${slug}"?`);
+        }
+
+        if (!confirmed) return;
         
         try {
-            // Get file SHA first
             const fileData = await githubApi('GET', `songs/${slug}.json`);
             if (fileData && fileData.sha) {
                 await githubApi('DELETE', `songs/${slug}.json`, {
@@ -324,7 +492,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
 
-            // Update index on GitHub
             let indexSongs = [];
             let indexSha = null;
             try {
@@ -338,7 +505,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
             } catch (err) {
-                console.log('Error fetching live index for delete:', err);
                 const localIndex = await getIndexJson();
                 indexSongs = localIndex.songs || [];
             }
@@ -354,9 +520,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             await githubApi('PUT', 'songs/index.json', indexPutBody);
+            if (window.UI) window.UI.toast(`Deleted "${slug}" from GitHub`, { type: 'success' });
             loadSongList();
         } catch (e) {
-            alert(`Failed to delete song: ${e.message}`);
+            if (window.UI) window.UI.toast(`Delete error: ${e.message}`, { type: 'error' });
+            else alert(`Failed to delete song: ${e.message}`);
         }
     }
 
@@ -376,6 +544,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
     songKeyInput.addEventListener('change', () => {
         updateKeyDropdownDisplay();
+        pushHistoryState();
+    });
+
+    songTitleInput.addEventListener('input', () => {
+        if (currentSong) {
+            currentSong.title = songTitleInput.value;
+        }
+    });
+
+    // Undo / Redo Click Handlers & Keyboard Shortcuts
+    undoBtn.addEventListener('click', undo);
+    redoBtn.addEventListener('click', redo);
+
+    document.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+            if (e.shiftKey) {
+                e.preventDefault();
+                redo();
+            } else {
+                e.preventDefault();
+                undo();
+            }
+        } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
+            e.preventDefault();
+            redo();
+        } else if (e.key === 'Escape') {
+            closePicker();
+            settingsModal.classList.add('hidden');
+        }
     });
 
     function downloadCurrentSongJson() {
@@ -394,6 +591,7 @@ document.addEventListener('DOMContentLoaded', () => {
         dlAnchorElem.setAttribute("href", dataStr);
         dlAnchorElem.setAttribute("download", `${slug}.json`);
         dlAnchorElem.click();
+        if (window.UI) window.UI.toast(`Downloaded ${slug}.json`, { type: 'success' });
     }
 
     async function saveCurrentSong() {
@@ -410,7 +608,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const s = getSettings();
         if (!s.pat) {
             saveStatus.innerHTML = '<span style="color:#c0392b">⚠️ PAT not set. Configure in ⚙️ Settings, or use "Download JSON".</span>';
-            settingsPanel.classList.remove('hidden');
+            settingsModal.classList.remove('hidden');
             return;
         }
         
@@ -422,7 +620,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const songContent = JSON.stringify(currentSong, null, 2);
             const encodedContent = btoa(unescape(encodeURIComponent(songContent)));
             
-            // Check current sha on GitHub (if file exists)
             let fileSha = currentSongSha;
             try {
                 const existing = await githubApi('GET', `songs/${slug}.json`);
@@ -433,7 +630,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.log('No existing song file on GitHub:', err);
             }
 
-            // Save song file (omit sha key if creating new file)
             const putBody = {
                 message: `Update song ${currentSong.title}`,
                 content: encodedContent
@@ -462,7 +658,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
             } catch (err) {
-                console.log('Could not get live index from GitHub, trying local fallback:', err);
                 const localIndex = await getIndexJson();
                 indexSongs = localIndex.songs || [];
             }
@@ -496,10 +691,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             saveStatus.textContent = '✅ Saved to GitHub successfully!';
             saveStatus.style.color = '#27ae60';
+            if (window.UI) window.UI.toast(`Saved "${currentSong.title}" to GitHub`, { type: 'success' });
             setTimeout(() => saveStatus.textContent = '', 4000);
         } catch (e) {
             saveStatus.textContent = `Error: ${e.message}`;
             saveStatus.style.color = '#c0392b';
+            if (window.UI) window.UI.toast(`Save error: ${e.message}`, { type: 'error' });
         } finally {
             saveSongBtn.disabled = false;
         }
@@ -521,6 +718,10 @@ document.addEventListener('DOMContentLoaded', () => {
     newSongBtn.addEventListener('click', () => {
         currentSong = ChordUtils.createSong('', '');
         currentSongSha = null;
+        historyStack = [ChordUtils.cloneSong(currentSong)];
+        historyIndex = 0;
+        updateHistoryButtons();
+
         songTitleInput.value = '';
         songKeyInput.value = 'auto';
         updateKeyDropdownDisplay();
@@ -554,18 +755,18 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         
         if (targetId === 'input-mode' && currentSong) {
-            // Populate textarea with current song text & chords
             lyricsInput.value = ChordUtils.songToText(currentSong, true);
         } else if (targetId === 'edit-mode' && currentSong) {
-            renderCurrentSong();
+            renderCurrentSong(false);
         }
     }
 
-    // Lyrics Input
+    // Lyrics Input Mode Format Action
     formatLyricsBtn.addEventListener('click', () => {
         const text = lyricsInput.value.trim();
         if (!text) {
-            alert("Please enter some lyrics first.");
+            if (window.UI) window.UI.toast("Please enter lyrics or ChordPro text first.", { type: 'warning' });
+            else alert("Please enter some lyrics first.");
             return;
         }
         
@@ -579,7 +780,9 @@ document.addEventListener('DOMContentLoaded', () => {
         currentSong.key = key;
         currentSong.sections = ChordUtils.parseLyrics(text);
         
+        pushHistoryState();
         switchTab('edit-mode');
+        if (window.UI) window.UI.toast('Formatted lyrics into Visual Chord Editor', { type: 'success' });
     });
 
     // Top Insert Controls
@@ -597,7 +800,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 comment: '(x2)',
                 lyrics: ''
             });
-            renderCurrentSong();
+            pushHistoryState();
+            renderCurrentSong(false);
             window.scrollTo({ top: 0, behavior: 'smooth' });
         });
     }
@@ -614,7 +818,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 lyrics: 'New lyrics line',
                 chords: []
             });
-            renderCurrentSong();
+            pushHistoryState();
+            renderCurrentSong(false);
             window.scrollTo({ top: 0, behavior: 'smooth' });
         });
     }
@@ -633,22 +838,25 @@ document.addEventListener('DOMContentLoaded', () => {
                     lyrics: ''
                 }]
             });
-            renderCurrentSong();
+            pushHistoryState();
+            renderCurrentSong(false);
             window.scrollTo({ top: 0, behavior: 'smooth' });
         });
     }
 
+    // P0 BUG FIX: Bottom "+ Add Section" & "+ Add Instrumental Block" buttons APPEND (push) to end of song!
     const addSectionBtn = document.getElementById('add-section-btn');
     if (addSectionBtn) {
         addSectionBtn.addEventListener('click', () => {
             if (!currentSong) currentSong = ChordUtils.createSong('', 'C');
             if (!currentSong.sections) currentSong.sections = [];
-            currentSong.sections.unshift({
+            currentSong.sections.push({
                 label: 'Chorus',
                 lines: [{ lyrics: 'New lyrics line', chords: [] }]
             });
-            renderCurrentSong();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            pushHistoryState();
+            renderCurrentSong(false);
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
         });
     }
 
@@ -657,8 +865,8 @@ document.addEventListener('DOMContentLoaded', () => {
         addInstSecBtn.addEventListener('click', () => {
             if (!currentSong) currentSong = ChordUtils.createSong('', 'C');
             if (!currentSong.sections) currentSong.sections = [];
-            currentSong.sections.unshift({
-                label: 'Intro',
+            currentSong.sections.push({
+                label: 'Solo',
                 lines: [{
                     type: 'chords',
                     chords: [{ chord: 'G' }, { chord: 'Em' }, { chord: 'C' }, { chord: 'D' }],
@@ -666,28 +874,39 @@ document.addEventListener('DOMContentLoaded', () => {
                     lyrics: ''
                 }]
             });
-            renderCurrentSong();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            pushHistoryState();
+            renderCurrentSong(false);
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
         });
     }
 
     const mergeSectionsBtn = document.getElementById('merge-sections-btn');
     if (mergeSectionsBtn) {
-        mergeSectionsBtn.addEventListener('click', () => {
+        mergeSectionsBtn.addEventListener('click', async () => {
             if (!currentSong || !currentSong.sections || currentSong.sections.length <= 1) {
-                alert('Song is already a single continuous section.');
+                if (window.UI) window.UI.toast('Song is already a single continuous section.', { type: 'info' });
                 return;
             }
-            if (confirm('Merge all sections into one continuous block? (All lyrics and chords will be kept)')) {
+            let confirmed = false;
+            if (window.UI && typeof window.UI.confirm === 'function') {
+                confirmed = await window.UI.confirm('Merge All Sections', 'Combine all sections into one continuous block? (All lyrics and chords will be kept)', false);
+            } else {
+                confirmed = confirm('Merge all sections into one continuous block?');
+            }
+            if (confirmed) {
                 ChordUtils.mergeAllSections(currentSong);
-                renderCurrentSong();
+                pushHistoryState();
+                renderCurrentSong(false);
             }
         });
     }
 
     // Editor Rendering
-    function renderCurrentSong() {
+    function renderCurrentSong(recordHistory = true) {
         if (!currentSong) return;
+        if (recordHistory) {
+            pushHistoryState();
+        }
         songRenderContainer.innerHTML = '';
         ChordUtils.renderSong(currentSong, songRenderContainer, {
             editable: true,
@@ -695,22 +914,19 @@ document.addEventListener('DOMContentLoaded', () => {
             onMeasureChordClick: handleMeasureChordClick,
             onSongChanged: () => {
                 updateKeyDropdownDisplay();
+                pushHistoryState();
             }
         });
     }
 
-    // Active Chord Target: { type: 'word', si, li, wi, el } or { type: 'measure', si, li, ci, el }
-    let activeChordTarget = null;
-
+    // Chord Picker Interactions
     function handleWordClick(si, li, wi, slotEl) {
         activeChordTarget = { type: 'word', si, li, wi, el: slotEl };
         
-        // Remove active class from all
         document.querySelectorAll('.chord-word, .chord-measure-box').forEach(el => el.classList.remove('active-word', 'active-measure'));
         const wordEl = slotEl.closest('.chord-word');
         if (wordEl) wordEl.classList.add('active-word');
 
-        // Check if there is an existing chord
         const section = currentSong.sections[si];
         if (!section || !section.lines || !section.lines[li]) return;
         if (!section.lines[li].chords) section.lines[li].chords = [];
@@ -757,9 +973,23 @@ document.addEventListener('DOMContentLoaded', () => {
         positionPicker(boxEl);
     }
 
+    // Smart Viewport Positioning with Bottom-Overflow Detection
     function positionPicker(targetEl) {
+        if (window.innerWidth <= 600) {
+            chordPicker.classList.remove('hidden');
+            return;
+        }
+
         const rect = targetEl.getBoundingClientRect();
-        chordPicker.style.top = `${window.scrollY + rect.bottom + 10}px`;
+        const pickerHeight = 360;
+        let top = window.scrollY + rect.bottom + 10;
+        
+        // Flip above if overflowing bottom
+        if (rect.bottom + pickerHeight > window.innerHeight && rect.top > pickerHeight) {
+            top = window.scrollY + rect.top - pickerHeight - 10;
+        }
+
+        chordPicker.style.top = `${Math.max(10, top)}px`;
         let left = rect.left;
         if (left + 330 > window.innerWidth) {
             left = window.innerWidth - 340;
@@ -772,7 +1002,6 @@ document.addEventListener('DOMContentLoaded', () => {
         let foundRoot = '';
         let foundQuality = '';
         
-        // Check 2-char roots first (sharps/flats)
         if (chordStr.length >= 2 && ['#','b'].includes(chordStr[1])) {
             foundRoot = chordStr.substring(0, 2);
             foundQuality = chordStr.substring(2);
@@ -825,7 +1054,6 @@ document.addEventListener('DOMContentLoaded', () => {
             customChordInput.value = '';
             updatePickerUI();
             
-            // Auto-apply if root is selected
             if (selectedRoot) {
                 applyChord(selectedRoot + selectedQuality);
             }
@@ -869,7 +1097,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         closePicker();
         updateKeyDropdownDisplay();
-        renderCurrentSong();
+        renderCurrentSong(true);
     }
 
     removeChordBtn.addEventListener('click', () => {
@@ -897,7 +1125,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         closePicker();
         updateKeyDropdownDisplay();
-        renderCurrentSong();
+        renderCurrentSong(true);
     });
 
     closePickerBtn.addEventListener('click', closePicker);
@@ -918,6 +1146,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Init
+    // Start
     checkAuth();
 });

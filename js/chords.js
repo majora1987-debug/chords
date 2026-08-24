@@ -567,8 +567,9 @@ window.ChordUtils = (() => {
           // Trello-style Ultra-Smooth Pointer Events Drag Handle
           const dragHandle = document.createElement('span');
           dragHandle.className = 'section-drag-handle';
-          dragHandle.innerHTML = '&#x283F;'; // ⠿ symbol
+          dragHandle.innerHTML = window.UI ? window.UI.icon('drag') : '&#x283F;';
           dragHandle.title = 'Drag to reposition section boundary';
+          dragHandle.setAttribute('aria-label', 'Drag to reposition section');
 
           dragHandle.addEventListener('pointerdown', (e) => {
             if (e.button !== 0) return; // Left click only
@@ -586,9 +587,10 @@ window.ChordUtils = (() => {
 
             const floatingCard = document.createElement('div');
             floatingCard.className = 'trello-drag-card';
+            const dragIconHtml = window.UI ? window.UI.icon('drag') : '&#x283F;';
             floatingCard.innerHTML = `
               <div class="drag-card-header">
-                <span class="drag-card-icon">&#x283F;</span>
+                <span class="drag-card-icon">${dragIconHtml}</span>
                 <span class="drag-card-title">${labelText}</span>
               </div>
               <span class="drag-card-badge">${lineCount} line${lineCount === 1 ? '' : 's'}</span>
@@ -760,8 +762,9 @@ window.ChordUtils = (() => {
           // Move Up 1 line
           const upBtn = document.createElement('button');
           upBtn.className = 'sec-ctrl-btn';
-          upBtn.innerHTML = '▲';
+          upBtn.innerHTML = window.UI ? window.UI.icon('arrowUp') : '▲';
           upBtn.title = 'Move section up 1 line';
+          upBtn.setAttribute('aria-label', 'Move section up 1 line');
           upBtn.addEventListener('click', () => {
             let myStartLine = 0;
             for (let i = 0; i < si; i++) {
@@ -778,8 +781,9 @@ window.ChordUtils = (() => {
           // Move Down 1 line
           const downBtn = document.createElement('button');
           downBtn.className = 'sec-ctrl-btn';
-          downBtn.innerHTML = '▼';
+          downBtn.innerHTML = window.UI ? window.UI.icon('arrowDown') : '▼';
           downBtn.title = 'Move section down 1 line';
+          downBtn.setAttribute('aria-label', 'Move section down 1 line');
           downBtn.addEventListener('click', () => {
             let myStartLine = 0;
             for (let i = 0; i < si; i++) {
@@ -843,10 +847,18 @@ window.ChordUtils = (() => {
           // Delete Section (prompt)
           const delBtn = document.createElement('button');
           delBtn.className = 'sec-ctrl-btn sec-delete-btn';
-          delBtn.innerHTML = '🗑️';
+          delBtn.innerHTML = window.UI ? window.UI.icon('trash') : '🗑️';
           delBtn.title = 'Delete section and all its lines';
-          delBtn.addEventListener('click', () => {
-            if (confirm(`Delete section "${section.label || 'Section ' + (si + 1)}" and its lines?`)) {
+          delBtn.setAttribute('aria-label', 'Delete section');
+          delBtn.addEventListener('click', async () => {
+            const secName = section.label || 'Section ' + (si + 1);
+            let ok = false;
+            if (window.UI && typeof window.UI.confirm === 'function') {
+              ok = await window.UI.confirm('Delete Section', `Are you sure you want to delete "${secName}" and all its lines?`, true);
+            } else {
+              ok = confirm(`Delete section "${secName}" and its lines?`);
+            }
+            if (ok) {
               song.sections.splice(si, 1);
               renderSong(song, container, options);
               if (onSongChanged) onSongChanged();
@@ -1214,8 +1226,9 @@ window.ChordUtils = (() => {
           // Edit line text
           const editLyricsBtn = document.createElement('button');
           editLyricsBtn.className = 'line-action-btn';
-          editLyricsBtn.innerHTML = '✏️';
+          editLyricsBtn.innerHTML = window.UI ? window.UI.icon('edit') : '✏️';
           editLyricsBtn.title = 'Edit line lyrics text';
+          editLyricsBtn.setAttribute('aria-label', 'Edit line lyrics text');
           editLyricsBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             startEditLine(lineEl, line, section, si, li);
@@ -1227,6 +1240,7 @@ window.ChordUtils = (() => {
           splitSecBtn.className = 'line-action-btn';
           splitSecBtn.innerHTML = '+§';
           splitSecBtn.title = 'Split into new section from here';
+          splitSecBtn.setAttribute('aria-label', 'Split into new section from here');
           splitSecBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             const linesRemaining = section.lines.slice(0, li + 1);
@@ -1246,8 +1260,9 @@ window.ChordUtils = (() => {
           // Delete line
           const delLineBtn = document.createElement('button');
           delLineBtn.className = 'line-action-btn';
-          delLineBtn.innerHTML = '✕';
+          delLineBtn.innerHTML = window.UI ? window.UI.icon('close') : '✕';
           delLineBtn.title = 'Delete line';
+          delLineBtn.setAttribute('aria-label', 'Delete line');
           delLineBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             section.lines.splice(li, 1);
@@ -1302,6 +1317,46 @@ window.ChordUtils = (() => {
     }
   }
 
+  /**
+   * Helper: Deep clone a song object for undo/redo snapshots
+   */
+  function cloneSong(song) {
+    if (!song) return null;
+    return JSON.parse(JSON.stringify(song));
+  }
+
+  /**
+   * Helper: Calculate song statistics and completeness
+   */
+  function getSongStats(song) {
+    if (!song || !song.sections) {
+      return { totalChords: 0, uniqueChords: [], sectionCount: 0, lineCount: 0, hasChords: false };
+    }
+    const chordSet = new Set();
+    let totalChords = 0;
+    let lineCount = 0;
+
+    song.sections.forEach(sec => {
+      (sec.lines || []).forEach(l => {
+        lineCount++;
+        (l.chords || []).forEach(c => {
+          if (c.chord && c.chord.trim() && c.chord !== 'N.C.' && c.chord !== '-') {
+            totalChords++;
+            chordSet.add(c.chord.trim());
+          }
+        });
+      });
+    });
+
+    return {
+      totalChords,
+      uniqueChords: Array.from(chordSet),
+      sectionCount: song.sections.length,
+      lineCount,
+      hasChords: totalChords > 0
+    };
+  }
+
   // Public API
   return {
     NOTES_SHARP,
@@ -1316,6 +1371,8 @@ window.ChordUtils = (() => {
     parseLyrics,
     songToText,
     createSong,
+    cloneSong,
+    getSongStats,
     detectKey,
     moveSectionHeaderToLine,
     mergeAllSections,
