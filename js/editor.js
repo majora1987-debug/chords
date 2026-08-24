@@ -145,13 +145,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // GitHub API Helper
     async function githubApi(method, path, body = null) {
         const s = getSettings();
-        if (!s.pat) {
-            throw new Error("GitHub PAT not configured in settings.");
+        const cleanPat = (s.pat || '').trim().replace(/^['"]|['"]$/g, '');
+        if (!cleanPat) {
+            throw new Error("GitHub PAT not configured. Please click ⚙️ Settings at the top to configure your Personal Access Token.");
         }
         
         const url = `https://api.github.com/repos/${s.owner}/${s.repo}/contents/${path}`;
         const headers = {
-            'Authorization': `Bearer ${s.pat}`,
+            'Authorization': `Bearer ${cleanPat}`,
             'Accept': 'application/vnd.github.v3+json',
             'Content-Type': 'application/json'
         };
@@ -171,6 +172,9 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (!res.ok) {
             if (res.status === 404) return null;
+            if (res.status === 401) {
+                throw new Error("GitHub Authentication Failed (401 Bad Credentials): Please check your GitHub Personal Access Token in ⚙️ Settings. (Make sure it has the 'repo' scope).");
+            }
             const errText = await res.text();
             throw new Error(`GitHub API Error (${res.status}): ${errText}`);
         }
