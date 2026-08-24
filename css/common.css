@@ -1,0 +1,624 @@
+/* ============================================================
+   The Red Ram — Chord Charts
+   Shared styles for viewer and editor
+   Ultra-modern, sleek design with glassmorphism & rich contrast
+   ============================================================ */
+
+/* --- Reset & Base --- */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --color-bg: #f8fafc;
+  --color-surface: #ffffff;
+  --color-surface-card: #ffffff;
+  --color-surface-hover: #f1f5f9;
+  --color-border: #e2e8f0;
+  --color-border-subtle: #f1f5f9;
+  --color-text: #0f172a;
+  --color-text-secondary: #475569;
+  --color-text-muted: #64748b;
+  --color-accent: #e11d48;        /* Modern Electric Crimson */
+  --color-accent-hover: #be123c;
+  --color-accent-light: #fda4af;
+  --color-accent-bg: rgba(225, 29, 72, 0.08);
+  --color-accent-gradient: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
+  --color-chord: #e11d48;
+  --color-chord-bg: rgba(225, 29, 72, 0.09);
+  --color-hover: #f8fafc;
+  --color-white: #ffffff;
+  --color-input-bg: #ffffff;
+  --header-bg: rgba(255, 255, 255, 0.85);
+
+  --font-ui: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+  --font-lyrics: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
+  --font-chord: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-lg: 16px;
+  --radius-pill: 9999px;
+
+  --shadow-subtle: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.06), 0 1px 2px -1px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 12px -2px rgba(0, 0, 0, 0.08), 0 2px 6px -2px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 12px 24px -4px rgba(0, 0, 0, 0.1), 0 4px 8px -4px rgba(0, 0, 0, 0.04);
+  --shadow-xl: 0 20px 30px -6px rgba(0, 0, 0, 0.12), 0 8px 12px -4px rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="dark"] {
+  --color-bg: #090d16;
+  --color-surface: #111827;
+  --color-surface-card: #151d30;
+  --color-surface-hover: #1f293d;
+  --color-border: #1e293b;
+  --color-border-subtle: #172033;
+  --color-text: #f8fafc;
+  --color-text-secondary: #cbd5e1;
+  --color-text-muted: #94a3b8;
+  --color-accent: #f43f5e;
+  --color-accent-hover: #fb7185;
+  --color-accent-light: #fda4af;
+  --color-accent-bg: rgba(244, 63, 94, 0.15);
+  --color-accent-gradient: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+  --color-chord: #fb7185;
+  --color-chord-bg: rgba(251, 113, 133, 0.12);
+  --color-hover: #1e293b;
+  --color-white: #151d30;
+  --color-input-bg: #0f172a;
+  --header-bg: rgba(17, 24, 39, 0.85);
+
+  --shadow-subtle: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px -1px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 14px -2px rgba(0, 0, 0, 0.4), 0 2px 6px -2px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 14px 28px -4px rgba(0, 0, 0, 0.5), 0 6px 12px -4px rgba(0, 0, 0, 0.3);
+  --shadow-xl: 0 24px 38px -6px rgba(0, 0, 0, 0.6), 0 10px 16px -4px rgba(0, 0, 0, 0.4);
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-ui);
+  background: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.5;
+  min-height: 100vh;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+/* --- Header / Navbar with Frosted Glass --- */
+.site-header {
+  background: var(--header-bg);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--color-border);
+  padding: 0.75rem 1.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: var(--shadow-sm);
+  transition: background-color 0.25s ease, border-color 0.25s ease;
+}
+
+.site-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1.25rem;
+  font-weight: 800;
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+  text-decoration: none;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.site-logo:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.site-logo .logo-img {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--color-accent);
+  box-shadow: 0 0 10px rgba(225, 29, 72, 0.25);
+  display: block;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.theme-toggle-btn {
+  font-size: 1.15rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.18s ease;
+  box-shadow: var(--shadow-subtle);
+}
+
+.theme-toggle-btn:hover {
+  background: var(--color-surface-hover);
+  border-color: var(--color-accent);
+  transform: scale(1.05);
+}
+
+.theme-toggle-btn:active {
+  transform: scale(0.95);
+}
+
+/* --- Brand Hero Banner --- */
+.brand-banner {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1.25rem 1.5rem;
+  background: var(--color-surface-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow-md);
+  position: relative;
+  overflow: hidden;
+}
+
+.brand-banner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--color-accent-gradient);
+}
+
+.brand-banner .banner-logo {
+  width: 68px;
+  height: 68px;
+  border-radius: 14px;
+  object-fit: cover;
+  border: 2px solid var(--color-accent);
+  box-shadow: 0 6px 16px rgba(225, 29, 72, 0.25);
+  flex-shrink: 0;
+}
+
+.brand-banner .banner-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.brand-banner .banner-text h2 {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+}
+
+.brand-banner .banner-text p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+/* --- Modern Buttons --- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-family: var(--font-ui);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.15s ease;
+  box-shadow: var(--shadow-subtle);
+  user-select: none;
+}
+
+.btn:hover {
+  background: var(--color-surface-hover);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.btn-primary, .primary-btn {
+  background: var(--color-accent-gradient) !important;
+  color: #ffffff !important;
+  border-color: transparent !important;
+  box-shadow: 0 4px 12px rgba(225, 29, 72, 0.3) !important;
+}
+
+.btn-primary:hover, .primary-btn:hover {
+  opacity: 0.95;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(225, 29, 72, 0.4) !important;
+}
+
+.btn-sm {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8rem;
+  border-radius: var(--radius-sm);
+}
+
+.btn-icon {
+  padding: 0.45rem 0.65rem;
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+}
+
+.danger-btn {
+  background: rgba(239, 68, 68, 0.1) !important;
+  color: #ef4444 !important;
+  border-color: rgba(239, 68, 68, 0.25) !important;
+}
+
+.danger-btn:hover {
+  background: #ef4444 !important;
+  color: #ffffff !important;
+}
+
+/* --- Floating Pointer Drag Pill --- */
+.drag-floating-pill {
+  position: fixed;
+  z-index: 10000;
+  pointer-events: none;
+  background: var(--color-accent-gradient);
+  color: #fff;
+  padding: 6px 16px;
+  border-radius: var(--radius-pill);
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28), 0 4px 10px rgba(225, 29, 72, 0.4);
+  transform: translate(-50%, -50%) rotate(2deg) scale(1.05);
+  transition: transform 0.08s ease-out;
+}
+
+.drag-floating-pill .pill-icon {
+  font-size: 1.1rem;
+  opacity: 0.85;
+}
+
+body.is-dragging-active {
+  user-select: none;
+  cursor: grabbing !important;
+}
+
+body.is-dragging-active * {
+  cursor: grabbing !important;
+}
+
+.song-section.is-dragging,
+.section-header-row.is-dragging {
+  opacity: 0.35;
+  filter: grayscale(0.5);
+  transition: opacity 0.15s ease;
+}
+
+/* --- Section Dividers & Headers --- */
+.song-section {
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.section-header-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.section-drag-handle {
+  cursor: grab;
+  color: var(--color-text-muted);
+  font-size: 1.1rem;
+  padding: 2px 6px;
+  user-select: none;
+  border-radius: var(--radius-sm);
+  transition: all 0.15s;
+}
+
+.section-drag-handle:hover {
+  background: var(--color-accent-bg);
+  color: var(--color-accent);
+}
+
+.section-drag-handle:active {
+  cursor: grabbing;
+}
+
+.section-label {
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-accent);
+  flex-grow: 1;
+}
+
+.section-label.editable-label {
+  cursor: text;
+  border-bottom: 1px dashed var(--color-border);
+  outline: none;
+  min-width: 80px;
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  transition: all 0.15s ease;
+}
+
+.section-label.editable-label:hover {
+  background: var(--color-accent-bg);
+}
+
+.section-label.editable-label:focus {
+  border-bottom-color: var(--color-accent);
+  background: var(--color-accent-bg);
+}
+
+.section-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  opacity: 0.85;
+  transition: opacity 0.15s;
+}
+
+.song-section:hover .section-controls {
+  opacity: 1;
+}
+
+.sec-ctrl-btn {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 3px 7px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  line-height: 1.2;
+  transition: all 0.12s ease;
+}
+
+.sec-ctrl-btn:hover:not(:disabled) {
+  background: var(--color-accent-bg);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.sec-ctrl-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.sec-ctrl-btn.sec-delete-btn:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+/* --- Song Lines & Chords --- */
+.song-line {
+  position: relative;
+  margin-bottom: 0.75rem;
+  line-height: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  transition: margin 0.15s cubic-bezier(0.2, 0, 0, 1), padding 0.15s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.song-line.line-drop-indicator-top {
+  margin-top: 18px;
+}
+
+.song-line.line-drop-indicator-top::before {
+  content: '➔ Place Section Header Here';
+  position: absolute;
+  top: -12px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--color-accent-gradient);
+  box-shadow: 0 0 10px rgba(225, 29, 72, 0.6);
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--color-accent);
+  background: var(--color-surface);
+  border-radius: var(--radius-sm);
+  padding: 2px 10px;
+  border: 1px solid var(--color-accent);
+  z-index: 10;
+  pointer-events: none;
+  display: inline-block;
+  width: max-content;
+  animation: pulseIndicator 0.8s infinite alternate ease-in-out;
+}
+
+.song-line.line-drop-indicator-bottom {
+  margin-bottom: 18px;
+}
+
+.song-line.line-drop-indicator-bottom::after {
+  content: '➔ Place Section Header Here';
+  position: absolute;
+  bottom: -12px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--color-accent-gradient);
+  box-shadow: 0 0 10px rgba(225, 29, 72, 0.6);
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--color-accent);
+  background: var(--color-surface);
+  border-radius: var(--radius-sm);
+  padding: 2px 10px;
+  border: 1px solid var(--color-accent);
+  z-index: 10;
+  pointer-events: none;
+  display: inline-block;
+  width: max-content;
+  animation: pulseIndicator 0.8s infinite alternate ease-in-out;
+}
+
+@keyframes pulseIndicator {
+  0% { opacity: 0.85; transform: scale(0.98); }
+  100% { opacity: 1; transform: scale(1.02); }
+}
+
+.line-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 10px;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.song-line:hover .line-actions {
+  opacity: 1;
+}
+
+.line-action-btn {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  font-size: 0.75rem;
+  cursor: pointer;
+  padding: 3px 6px;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  transition: all 0.12s ease;
+}
+
+.line-action-btn:hover {
+  background: var(--color-surface-hover);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.chord-word {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-right: 0.5em;
+  position: relative;
+  cursor: default;
+}
+
+.chord-slot {
+  font-family: var(--font-chord);
+  font-weight: 800;
+  font-size: 0.9rem;
+  letter-spacing: 0.02em;
+  color: var(--color-chord);
+  min-height: 1.4em;
+  line-height: 1.4;
+  white-space: nowrap;
+  user-select: none;
+  transition: all 0.12s ease;
+}
+
+.chord-slot:not(.has-chord) {
+  visibility: hidden;
+}
+
+.chord-slot.editable {
+  cursor: pointer;
+  visibility: visible;
+  min-width: 1.2em;
+  border-radius: 4px;
+  padding: 0 4px;
+}
+
+.chord-slot.editable:not(.has-chord) {
+  opacity: 0;
+}
+
+.chord-word:hover .chord-slot.editable:not(.has-chord) {
+  opacity: 1;
+  background: var(--color-accent-bg);
+  color: var(--color-accent);
+}
+
+.chord-word:hover .chord-slot.editable:not(.has-chord)::after {
+  content: '+';
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.chord-slot.editable.has-chord:hover {
+  background: var(--color-accent-bg);
+  box-shadow: 0 0 0 2px var(--color-accent-light);
+}
+
+.word-text {
+  font-family: var(--font-lyrics);
+  font-size: 1.15rem;
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--color-text);
+  letter-spacing: -0.01em;
+}
+
+/* --- Layout & Footer --- */
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+.app-footer {
+  text-align: center;
+  padding: 2rem 1.5rem;
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  font-weight: 500;
+  border-top: 1px solid var(--color-border);
+  margin-top: 3rem;
+}

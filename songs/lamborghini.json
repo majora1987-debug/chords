@@ -1,0 +1,64 @@
+{
+  "title": "Lamborghini",
+  "artist": "The Red Ram",
+  "key": "",
+  "sections": [
+    {
+      "label": "Verse 1",
+      "lines": [
+        { "lyrics": "There's a little green man", "chords": [] },
+        { "lyrics": "Somewhere in my head", "chords": [] },
+        { "lyrics": "I'm cleaning floors", "chords": [] },
+        { "lyrics": "But I'm dreaming instead", "chords": [] },
+        { "lyrics": "Get off my back", "chords": [] },
+        { "lyrics": "You don't know my name", "chords": [] },
+        { "lyrics": "I'm not like you", "chords": [] },
+        { "lyrics": "I'm not the same", "chords": [] }
+      ]
+    },
+    {
+      "label": "Chorus",
+      "lines": [
+        { "lyrics": "You'll never have a Lamborghini", "chords": [] },
+        { "lyrics": "That's what, he said to me", "chords": [] },
+        { "lyrics": "You'll never have a Lamborghini", "chords": [] },
+        { "lyrics": "Get back to work", "chords": [] },
+        { "lyrics": "And no more dreaming", "chords": [] }
+      ]
+    },
+    {
+      "label": "Verse 2",
+      "lines": [
+        { "lyrics": "You think I'm nothing special", "chords": [] },
+        { "lyrics": "But that's alright", "chords": [] },
+        { "lyrics": "You got no hair on your head", "chords": [] },
+        { "lyrics": "But the rug looks fine", "chords": [] },
+        { "lyrics": "Get off my back", "chords": [] },
+        { "lyrics": "You don't know my name", "chords": [] },
+        { "lyrics": "I'm not like you", "chords": [] },
+        { "lyrics": "I'm not the same", "chords": [] }
+      ]
+    },
+    {
+      "label": "Chorus",
+      "lines": [
+        { "lyrics": "You'll never have a Lamborghini", "chords": [] },
+        { "lyrics": "That's what, he said to me", "chords": [] },
+        { "lyrics": "You'll never have a Lamborghini", "chords": [] },
+        { "lyrics": "Get back to work", "chords": [] },
+        { "lyrics": "And no more dreaming", "chords": [] }
+      ]
+    },
+    {
+      "label": "Outro",
+      "lines": [
+        { "lyrics": "You'll never have a Lamborghini", "chords": [] },
+        { "lyrics": "You'll never have a Lamborghini", "chords": [] },
+        { "lyrics": "You'll never have a Lamborghini", "chords": [] },
+        { "lyrics": "You'll never have a Lamborghini", "chords": [] },
+        { "lyrics": "Get back to work", "chords": [] },
+        { "lyrics": "And no more dreaming", "chords": [] }
+      ]
+    }
+  ]
+}

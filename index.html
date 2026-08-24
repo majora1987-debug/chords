@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Red Ram - Chords</title>
+    <link rel="icon" type="image/jpeg" href="img/logo.jpg">
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/viewer.css">
+    <script src="js/theme.js"></script>
+</head>
+<body>
+    <header class="site-header">
+        <a href="index.html" class="site-logo">
+            <img src="img/logo.jpg" alt="The Red Ram Logo" class="logo-img"> The Red Ram
+        </a>
+        <div class="header-actions">
+            <button class="theme-toggle-btn" title="Toggle Light/Dark Mode">🌙</button>
+            <a href="editor.html" class="btn btn-icon" title="Editor">⚙️</a>
+        </div>
+    </header>
+
+    <main class="app-main">
+        <!-- Song List View -->
+        <section id="song-list-view" class="view-section">
+            <div class="brand-banner">
+                <img src="img/logo.jpg" alt="The Red Ram Logo" class="banner-logo">
+                <div class="banner-text">
+                    <h2>The Red Ram</h2>
+                    <p>Band Chord Charts & Setlists</p>
+                </div>
+            </div>
+            <div class="list-controls">
+                <input type="text" id="song-search" placeholder="Search songs..." class="search-input">
+            </div>
+            <div id="song-list-container" class="song-list">
+                <!-- Song cards will be rendered here -->
+            </div>
+            <div id="empty-state" class="empty-state" style="display: none;">
+                <p>No songs found.</p>
+            </div>
+        </section>
+
+        <!-- Song Detail View -->
+        <section id="song-detail-view" class="view-section" style="display: none;">
+            <div class="detail-header">
+                <button id="back-btn" class="btn btn-icon" title="Back to List">⬅️ Back</button>
+                <div class="song-info">
+                    <h2 id="detail-title">Song Title</h2>
+                    <span id="detail-key" class="badge">Key: C</span>
+                </div>
+                <div class="transpose-controls">
+                    <button id="transpose-down" class="btn btn-icon" title="Transpose Down">-</button>
+                    <span id="transpose-indicator">0</span>
+                    <button id="transpose-up" class="btn btn-icon" title="Transpose Up">+</button>
+                </div>
+            </div>
+            <div id="chord-chart" class="chord-chart-container">
+                <!-- Chord chart will be rendered here -->
+            </div>
+        </section>
+    </main>
+
+    <footer class="app-footer">
+        <p>&copy; <span id="current-year"></span> The Red Ram</p>
+    </footer>
+
+    <script src="js/chords.js"></script>
+    <script src="js/viewer.js"></script>
+</body>
+</html>

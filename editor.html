@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Red Ram — Editor</title>
+    <link rel="icon" type="image/jpeg" href="img/logo.jpg">
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/editor.css">
+    <script src="js/theme.js"></script>
+</head>
+<body>
+    <header class="site-header">
+        <div class="site-logo">
+            <img src="img/logo.jpg" alt="The Red Ram Logo" class="logo-img"> The Red Ram — Editor
+        </div>
+        <div class="header-actions">
+            <button class="theme-toggle-btn" title="Toggle Light/Dark Mode">🌙</button>
+            <button id="toggle-settings-btn" class="btn btn-icon" title="Settings">⚙️</button>
+            <a href="index.html" class="btn btn-sm">← Viewer</a>
+        </div>
+    </header>
+
+    <div id="settings-panel" class="settings-panel hidden">
+        <div class="card">
+            <h2>GitHub Settings</h2>
+            <p class="settings-hint">To save directly to your GitHub repo, generate a <a href="https://github.com/settings/tokens/new?scopes=repo&description=The%20Red%20Ram%20Chord%20Editor" target="_blank" rel="noopener">GitHub Personal Access Token (Classic with <code>repo</code> scope)</a> and paste it below. It is stored securely in your browser only.</p>
+            <div class="form-group">
+                <label for="gh-pat">Personal Access Token (PAT)</label>
+                <input type="password" id="gh-pat" placeholder="ghp_...">
+            </div>
+            <div class="form-group">
+                <label for="gh-owner">Repository Owner</label>
+                <input type="text" id="gh-owner" value="majora1987-debug">
+            </div>
+            <div class="form-group">
+                <label for="gh-repo">Repository Name</label>
+                <input type="text" id="gh-repo" value="chords">
+            </div>
+            <div class="form-group">
+                <label for="gh-branch">Branch</label>
+                <input type="text" id="gh-branch" value="main">
+            </div>
+            <div class="form-actions">
+                <button id="save-settings-btn" class="primary-btn">Save Settings</button>
+                <span id="settings-status" class="status-msg"></span>
+            </div>
+        </div>
+    </div>
+
+    <main class="container">
+        <!-- Song List View -->
+        <div id="editor-song-list" class="view active-view">
+            <div class="view-header">
+                <h2>Existing Songs</h2>
+                <button id="new-song-btn" class="primary-btn">New Song</button>
+            </div>
+            <div id="loading-songs" class="loading hidden">Loading songs...</div>
+            <div id="song-list-container" class="song-grid">
+                <!-- Songs populated here -->
+            </div>
+        </div>
+
+        <!-- Editor View -->
+        <div id="editor-view" class="view hidden">
+            <div class="editor-header">
+                <div class="form-group inline">
+                    <label for="song-title">Title:</label>
+                    <input type="text" id="song-title" placeholder="Song Title">
+                </div>
+                <div class="form-group inline">
+                    <label for="song-key">Key:</label>
+                    <select id="song-key">
+                        <option value="auto">✨ Auto-detect from chords</option>
+                        <optgroup label="Major Keys">
+                            <option value="C">C</option>
+                            <option value="C#">C# / Db</option>
+                            <option value="D">D</option>
+                            <option value="Eb">Eb / D#</option>
+                            <option value="E">E</option>
+                            <option value="F">F</option>
+                            <option value="F#">F# / Gb</option>
+                            <option value="G">G</option>
+                            <option value="Ab">Ab / G#</option>
+                            <option value="A">A</option>
+                            <option value="Bb">Bb / A#</option>
+                            <option value="B">B</option>
+                        </optgroup>
+                        <optgroup label="Minor Keys">
+                            <option value="Am">Am</option>
+                            <option value="Bbm">Bbm</option>
+                            <option value="Bm">Bm</option>
+                            <option value="Cm">Cm</option>
+                            <option value="C#m">C#m</option>
+                            <option value="Dm">Dm</option>
+                            <option value="Ebm">Ebm</option>
+                            <option value="Em">Em</option>
+                            <option value="Fm">Fm</option>
+                            <option value="F#m">F#m</option>
+                            <option value="Gm">Gm</option>
+                            <option value="G#m">G#m</option>
+                        </optgroup>
+                    </select>
+                </div>
+            </div>
+
+            <div class="tabs">
+                <button class="tab-btn active" data-target="input-mode">📝 Lyrics / Text Mode</button>
+                <button class="tab-btn" data-target="edit-mode">🎸 Visual Chord Editor</button>
+            </div>
+
+            <div id="input-mode" class="tab-content active-tab">
+                <div class="form-group">
+                    <label for="lyrics-input">Edit Lyrics & Chords (blank lines create section breaks, optional <code>[Chord]</code> brackets):</label>
+                    <textarea id="lyrics-input" placeholder="Verse 1\n\nWhen it's approaching 1am..."></textarea>
+                </div>
+                <button id="format-lyrics-btn" class="primary-btn">Apply & Switch to Visual Editor</button>
+            </div>
+
+            <div id="edit-mode" class="tab-content">
+                <div class="editor-section-toolbar">
+                    <button id="merge-sections-btn" class="btn btn-sm secondary-btn" title="Remove all section headers and combine into one continuous lyrics block">Merge All Sections (Keep Lyrics)</button>
+                    <span class="editor-tip">💡 Tip: Click above words to set chords • Double-click lyrics to edit text • Drag ⠿ to reorder</span>
+                </div>
+                <div id="song-render-container" class="song-container">
+                    <!-- Formatted song renders here -->
+                </div>
+                <div class="add-section-row">
+                    <button id="add-section-btn" class="btn btn-sm btn-primary">+ Add New Section</button>
+                </div>
+            </div>
+
+            <div class="editor-actions">
+                <span id="save-status" class="status-msg"></span>
+                <button id="cancel-edit-btn" class="secondary-btn">Cancel</button>
+                <button id="download-json-btn" class="secondary-btn" title="Download song JSON locally">Download JSON</button>
+                <button id="save-song-btn" class="primary-btn">Save to GitHub</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Chord Picker Popover -->
+    <div id="chord-picker" class="chord-picker hidden">
+        <div class="picker-header">
+            <div class="chord-preview" id="chord-preview">C</div>
+            <button id="close-picker-btn" class="icon-btn">&times;</button>
+        </div>
+        <div class="picker-body">
+            <div class="picker-section">
+                <h4>Root Note</h4>
+                <div class="root-grid">
+                    <button class="root-btn" data-val="C">C</button>
+                    <button class="root-btn" data-val="D">D</button>
+                    <button class="root-btn" data-val="E">E</button>
+                    <button class="root-btn" data-val="F">F</button>
+                    <button class="root-btn" data-val="G">G</button>
+                    <button class="root-btn" data-val="A">A</button>
+                    <button class="root-btn" data-val="B">B</button>
+                </div>
+                <div class="root-grid">
+                    <button class="root-btn" data-val="C#">C#</button>
+                    <button class="root-btn" data-val="Eb">Eb</button>
+                    <button class="root-btn" data-val="F#">F#</button>
+                    <button class="root-btn" data-val="Ab">Ab</button>
+                    <button class="root-btn" data-val="Bb">Bb</button>
+                </div>
+            </div>
+            <div class="picker-section">
+                <h4>Quality</h4>
+                <div class="quality-grid">
+                    <button class="quality-btn" data-val="">Major</button>
+                    <button class="quality-btn" data-val="m">m</button>
+                    <button class="quality-btn" data-val="7">7</button>
+                    <button class="quality-btn" data-val="maj7">maj7</button>
+                    <button class="quality-btn" data-val="m7">m7</button>
+                    <button class="quality-btn" data-val="sus2">sus2</button>
+                    <button class="quality-btn" data-val="sus4">sus4</button>
+                    <button class="quality-btn" data-val="dim">dim</button>
+                    <button class="quality-btn" data-val="aug">aug</button>
+                    <button class="quality-btn" data-val="add9">add9</button>
+                    <button class="quality-btn" data-val="6">6</button>
+                    <button class="quality-btn" data-val="9">9</button>
+                    <button class="quality-btn" data-val="5">5</button>
+                </div>
+            </div>
+            <div class="picker-section custom-chord">
+                <h4>Custom</h4>
+                <div class="custom-input-group">
+                    <input type="text" id="custom-chord-input" placeholder="e.g. C/G">
+                    <button id="apply-custom-btn" class="secondary-btn">Apply</button>
+                </div>
+            </div>
+        </div>
+        <div class="picker-footer">
+            <button id="remove-chord-btn" class="danger-btn hidden">Remove Chord</button>
+            <button id="apply-picker-btn" class="primary-btn">Apply Chord</button>
+        </div>
+    </div>
+
+    <script src="js/chords.js"></script>
+    <script src="js/editor.js"></script>
+</body>
+</html>
