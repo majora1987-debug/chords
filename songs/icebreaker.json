@@ -1,30 +1,87 @@
 {
   "title": "Icebreaker",
   "artist": "The Red Ram",
-  "key": "",
+  "key": "C",
   "sections": [
     {
       "label": "",
       "lines": [
         {
           "lyrics": "When it's approaching 1am, you've got nothing to show",
-          "chords": []
+          "chords": [
+            {
+              "wordIndex": 0,
+              "chord": "G"
+            },
+            {
+              "wordIndex": 3,
+              "chord": "C"
+            },
+            {
+              "wordIndex": 4,
+              "chord": "F"
+            }
+          ]
         },
         {
           "lyrics": "You need somethin' more than the vision in your head",
-          "chords": []
+          "chords": [
+            {
+              "wordIndex": 0,
+              "chord": "G"
+            },
+            {
+              "wordIndex": 7,
+              "chord": "F"
+            },
+            {
+              "wordIndex": 6,
+              "chord": "C"
+            }
+          ]
         },
         {
           "lyrics": "Talkin' in the mirror and it's all come to this",
-          "chords": []
+          "chords": [
+            {
+              "wordIndex": 0,
+              "chord": "G"
+            },
+            {
+              "wordIndex": 5,
+              "chord": "F"
+            },
+            {
+              "wordIndex": 4,
+              "chord": "C"
+            }
+          ]
         },
         {
           "lyrics": "Dreamin' of a moment that I can steal a kiss",
-          "chords": []
+          "chords": [
+            {
+              "wordIndex": 0,
+              "chord": "G"
+            },
+            {
+              "wordIndex": 5,
+              "chord": "C"
+            },
+            {
+              "wordIndex": 6,
+              "chord": "F"
+            }
+          ]
         },
         {
           "lyrics": "Icebreaker, to put you in the mood",
-          "chords": []
+          "chords": [
+            {
+              "wordIndex": 0,
+              "chord": "G"
+            }
+          ]
         },
         {
           "lyrics": "Icebreaker, somethin' so cool",
