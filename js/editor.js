@@ -311,23 +311,43 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             // Get file SHA first
             const fileData = await githubApi('GET', `songs/${slug}.json`);
-            if (fileData) {
+            if (fileData && fileData.sha) {
                 await githubApi('DELETE', `songs/${slug}.json`, {
                     message: `Delete song ${slug}`,
                     sha: fileData.sha
                 });
             }
 
-            // Update index
-            const indexData = await getIndexJson();
-            const updatedSongs = indexData.songs.filter(item => item.slug !== slug);
-            const indexContent = JSON.stringify({ songs: updatedSongs }, null, 2);
-            await githubApi('PUT', 'songs/index.json', {
-                message: `Update index after deleting ${slug}`,
-                content: btoa(unescape(encodeURIComponent(indexContent))),
-                sha: indexData.sha
-            });
+            // Update index on GitHub
+            let indexSongs = [];
+            let indexSha = null;
+            try {
+                const liveIndexData = await githubApi('GET', 'songs/index.json');
+                if (liveIndexData) {
+                    indexSha = liveIndexData.sha;
+                    if (liveIndexData.content) {
+                        const raw = decodeURIComponent(escape(atob(liveIndexData.content.replace(/\s/g, ''))));
+                        const parsed = JSON.parse(raw);
+                        indexSongs = Array.isArray(parsed) ? parsed : (parsed.songs || []);
+                    }
+                }
+            } catch (err) {
+                console.log('Error fetching live index for delete:', err);
+                const localIndex = await getIndexJson();
+                indexSongs = localIndex.songs || [];
+            }
 
+            const updatedSongs = indexSongs.filter(item => item.slug !== slug);
+            const indexContent = JSON.stringify({ songs: updatedSongs }, null, 2);
+            const indexPutBody = {
+                message: `Update index after deleting ${slug}`,
+                content: btoa(unescape(encodeURIComponent(indexContent)))
+            };
+            if (indexSha) {
+                indexPutBody.sha = indexSha;
+            }
+
+            await githubApi('PUT', 'songs/index.json', indexPutBody);
             loadSongList();
         } catch (e) {
             alert(`Failed to delete song: ${e.message}`);
@@ -396,28 +416,51 @@ document.addEventListener('DOMContentLoaded', () => {
             const songContent = JSON.stringify(currentSong, null, 2);
             const encodedContent = btoa(unescape(encodeURIComponent(songContent)));
             
-            // Check current sha on GitHub if we don't have it
-            if (!currentSongSha) {
+            // Check current sha on GitHub (if file exists)
+            let fileSha = currentSongSha;
+            try {
                 const existing = await githubApi('GET', `songs/${slug}.json`);
-                if (existing) {
-                    currentSongSha = existing.sha;
+                if (existing && existing.sha) {
+                    fileSha = existing.sha;
                 }
+            } catch (err) {
+                console.log('No existing song file on GitHub:', err);
             }
 
-            // Save file
-            const saveRes = await githubApi('PUT', `songs/${slug}.json`, {
+            // Save song file (omit sha key if creating new file)
+            const putBody = {
                 message: `Update song ${currentSong.title}`,
-                content: encodedContent,
-                sha: currentSongSha
-            });
-            if (saveRes && saveRes.content) {
+                content: encodedContent
+            };
+            if (fileSha) {
+                putBody.sha = fileSha;
+            }
+
+            const saveRes = await githubApi('PUT', `songs/${slug}.json`, putBody);
+            if (saveRes && saveRes.content && saveRes.content.sha) {
                 currentSongSha = saveRes.content.sha;
             }
 
-            // Update index
-            const indexData = await getIndexJson();
-            let indexSongs = indexData.songs || [];
-            
+            // Update index.json on GitHub
+            let indexSongs = [];
+            let indexSha = null;
+
+            try {
+                const liveIndexData = await githubApi('GET', 'songs/index.json');
+                if (liveIndexData) {
+                    indexSha = liveIndexData.sha;
+                    if (liveIndexData.content) {
+                        const raw = decodeURIComponent(escape(atob(liveIndexData.content.replace(/\s/g, ''))));
+                        const parsed = JSON.parse(raw);
+                        indexSongs = Array.isArray(parsed) ? parsed : (parsed.songs || []);
+                    }
+                }
+            } catch (err) {
+                console.log('Could not get live index from GitHub, trying local fallback:', err);
+                const localIndex = await getIndexJson();
+                indexSongs = localIndex.songs || [];
+            }
+
             const indexEntry = {
                 title: currentSong.title,
                 slug: slug,
@@ -435,11 +478,15 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const indexPayload = JSON.stringify({ songs: indexSongs }, null, 2);
-            await githubApi('PUT', 'songs/index.json', {
+            const indexPutBody = {
                 message: `Update index for ${currentSong.title}`,
-                content: btoa(unescape(encodeURIComponent(indexPayload))),
-                sha: indexData.sha
-            });
+                content: btoa(unescape(encodeURIComponent(indexPayload)))
+            };
+            if (indexSha) {
+                indexPutBody.sha = indexSha;
+            }
+
+            await githubApi('PUT', 'songs/index.json', indexPutBody);
 
             saveStatus.textContent = '✅ Saved to GitHub successfully!';
             saveStatus.style.color = '#27ae60';
