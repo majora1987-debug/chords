@@ -9,18 +9,10 @@
         {
           "type": "chords",
           "chords": [
-            {
-              "chord": "E"
-            },
-            {
-              "chord": "G"
-            },
-            {
-              "chord": "A"
-            },
-            {
-              "chord": "E"
-            }
+            { "chord": "E" },
+            { "chord": "G" },
+            { "chord": "A" },
+            { "chord": "E" }
           ],
           "comment": "",
           "lyrics": ""
@@ -28,93 +20,37 @@
       ]
     },
     {
-      "label": "VERSE",
+      "label": "Verse 1",
       "lines": [
         {
           "lyrics": "Sometimes you hear about",
           "chords": [
-            {
-              "wordIndex": 0,
-              "chord": "E"
-            }
+            { "wordIndex": 0, "chord": "E" }
           ]
         },
         {
           "lyrics": "A fiery woman without a doubt",
           "chords": [
-            {
-              "wordIndex": 5,
-              "chord": "A"
-            }
+            { "wordIndex": 5, "chord": "A" }
           ]
         },
         {
           "lyrics": "She’s the focus of every fight",
           "chords": [
-            {
-              "wordIndex": 0,
-              "chord": "E"
-            }
+            { "wordIndex": 0, "chord": "E" }
           ]
         },
         {
           "lyrics": "It’s what she does to me inside",
           "chords": [
-            {
-              "wordIndex": 6,
-              "chord": "A"
-            }
+            { "wordIndex": 6, "chord": "A" }
           ]
-        },
-        {
-          "lyrics": "I hear you calling me",
-          "chords": [
-            {
-              "wordIndex": 0,
-              "chord": "A"
-            }
-          ]
-        },
-        {
-          "lyrics": "Sweet sound in the night",
-          "chords": []
-        },
-        {
-          "lyrics": "Take me to your paradise",
-          "chords": []
-        },
-        {
-          "lyrics": "Take me way up high",
-          "chords": []
-        },
-        {
-          "lyrics": "My dirty daisy",
-          "chords": []
-        },
-        {
-          "lyrics": "You know how to drive me crazy",
-          "chords": []
-        },
-        {
-          "lyrics": "Love your liquorice laces",
-          "chords": []
-        },
-        {
-          "lyrics": "I might need somebody to save me",
-          "chords": []
-        },
-        {
-          "lyrics": "Save me",
-          "chords": []
-        },
-        {
-          "lyrics": "Daisy",
-          "chords": []
-        },
-        {
-          "lyrics": "Daisy",
-          "chords": []
-        },
+        }
+      ]
+    },
+    {
+      "label": "Verse 2",
+      "lines": [
         {
           "lyrics": "You see the Same thing",
           "chords": []
@@ -125,15 +61,26 @@
         },
         {
           "lyrics": "Love, desire, burning with fire",
-          "chords": []
+          "chords": [
+            { "wordIndex": 0, "chord": "E" }
+          ]
         },
         {
           "lyrics": "Cleopatra and Aphrodite",
-          "chords": []
-        },
+          "chords": [
+            { "wordIndex": 0, "chord": "A" }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "Pre-Chorus",
+      "lines": [
         {
           "lyrics": "I hear you calling me",
-          "chords": []
+          "chords": [
+            { "wordIndex": 0, "chord": "A" }
+          ]
         },
         {
           "lyrics": "Sweet sound in the night",
@@ -141,35 +88,75 @@
         },
         {
           "lyrics": "Take me to your paradise",
-          "chords": []
+          "chords": [
+            { "wordIndex": 0, "chord": "C" }
+          ]
         },
         {
           "lyrics": "Take me way up high",
-          "chords": []
-        },
+          "chords": [
+            { "wordIndex": 0, "chord": "D" }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "Chorus",
+      "lines": [
         {
           "lyrics": "My dirty daisy",
-          "chords": []
+          "chords": [
+            { "wordIndex": 0, "chord": "E" }
+          ]
         },
         {
           "lyrics": "You know how to drive me crazy",
           "chords": []
         },
         {
+          "type": "chords",
+          "chords": [
+            { "chord": "G" },
+            { "chord": "A" },
+            { "chord": "E" }
+          ],
+          "comment": "",
+          "lyrics": ""
+        },
+        {
           "lyrics": "Love your liquorice laces",
-          "chords": []
+          "chords": [
+            { "wordIndex": 0, "chord": "E" }
+          ]
         },
         {
           "lyrics": "I might need somebody to save me",
-          "chords": []
+          "chords": [
+            { "wordIndex": 5, "chord": "A" }
+          ]
         },
         {
           "lyrics": "Save me",
           "chords": []
         },
         {
-          "lyrics": "My dirty daisy",
+          "lyrics": "Daisy",
           "chords": []
+        },
+        {
+          "lyrics": "Daisy",
+          "chords": []
+        }
+      ]
+    },
+    {
+      "label": "Chorus",
+      "lines": [
+        {
+          "lyrics": "My dirty daisy",
+          "chords": [
+            { "wordIndex": 0, "chord": "E" }
+          ]
         },
         {
           "lyrics": "My dirty daisy",
@@ -177,7 +164,9 @@
         },
         {
           "lyrics": "My dirty daisy",
-          "chords": []
+          "chords": [
+            { "wordIndex": 0, "chord": "E" }
+          ]
         },
         {
           "lyrics": "You know how to drive me crazy",
@@ -185,11 +174,15 @@
         },
         {
           "lyrics": "Love your liquorice laces",
-          "chords": []
+          "chords": [
+            { "wordIndex": 0, "chord": "E" }
+          ]
         },
         {
           "lyrics": "I might need somebody to save me",
-          "chords": []
+          "chords": [
+            { "wordIndex": 5, "chord": "A" }
+          ]
         },
         {
           "lyrics": "My dirty daisy",
@@ -198,7 +191,12 @@
         {
           "lyrics": "My dirty daisy",
           "chords": []
-        },
+        }
+      ]
+    },
+    {
+      "label": "Outro",
+      "lines": [
         {
           "lyrics": "I might need someone to",
           "chords": []
