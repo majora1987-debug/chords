@@ -580,8 +580,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    function syncLyricsInputToSong() {
+        if (!currentSong) return;
+        const text = (lyricsInput ? lyricsInput.value : '').trim();
+        if (text) {
+            currentSong.sections = ChordUtils.parseLyrics(text);
+        }
+    }
+
     function downloadCurrentSongJson() {
         if (!currentSong) return;
+        const isInputTab = document.getElementById('input-mode') && document.getElementById('input-mode').classList.contains('active-tab');
+        if (isInputTab || (lyricsInput && lyricsInput.value.trim())) {
+            syncLyricsInputToSong();
+        }
+
         currentSong.title = songTitleInput.value.trim() || 'Untitled';
         
         const selectedKey = songKeyInput.value;
@@ -602,6 +615,12 @@ document.addEventListener('DOMContentLoaded', () => {
     async function saveCurrentSong() {
         if (!currentSong) return;
         
+        // Auto-sync from Text Mode textarea if lyrics were typed
+        const isInputTab = document.getElementById('input-mode') && document.getElementById('input-mode').classList.contains('active-tab');
+        if (isInputTab || (lyricsInput && lyricsInput.value.trim())) {
+            syncLyricsInputToSong();
+        }
+
         currentSong.title = songTitleInput.value.trim() || 'Untitled';
         const selectedKey = songKeyInput.value;
         currentSong.key = (selectedKey === 'auto' || !selectedKey) 
@@ -782,6 +801,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function switchTab(targetId) {
+        const wasInputMode = document.getElementById('input-mode') && document.getElementById('input-mode').classList.contains('active-tab');
+        
         tabBtns.forEach(b => b.classList.toggle('active', b.dataset.target === targetId));
         tabContents.forEach(c => {
             if (c.id === targetId) {
@@ -794,6 +815,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (targetId === 'input-mode' && currentSong) {
             lyricsInput.value = ChordUtils.songToText(currentSong, true);
         } else if (targetId === 'edit-mode' && currentSong) {
+            if (wasInputMode && lyricsInput.value.trim()) {
+                syncLyricsInputToSong();
+            }
             renderCurrentSong(false);
         }
     }

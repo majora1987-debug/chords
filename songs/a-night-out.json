@@ -7,7 +7,52 @@
       "label": "Verse 1",
       "lines": [
         {
-          "lyrics": "Type your lyrics here",
+          "lyrics": "Struggling to stand",
+          "chords": []
+        },
+        {
+          "lyrics": "But it was a good night",
+          "chords": []
+        },
+        {
+          "lyrics": "Went right to plan",
+          "chords": []
+        }
+      ]
+    },
+    {
+      "label": "Verse 2",
+      "lines": [
+        {
+          "lyrics": "Now I lay on a bench",
+          "chords": []
+        },
+        {
+          "lyrics": "The boys come up to me",
+          "chords": []
+        },
+        {
+          "lyrics": "Where did you go?",
+          "chords": []
+        },
+        {
+          "lyrics": "You left me, sight unseen",
+          "chords": []
+        },
+        {
+          "lyrics": "Still got a story",
+          "chords": []
+        },
+        {
+          "lyrics": "A laugh or two",
+          "chords": []
+        },
+        {
+          "lyrics": "Back to the hometown",
+          "chords": []
+        },
+        {
+          "lyrics": "No one remembers you",
           "chords": []
         }
       ]
