@@ -6,10 +6,85 @@
     {
       "label": "Verse 1",
       "lines": [
-        {
-          "lyrics": "Type your lyrics here",
-          "chords": []
-        }
+        { "lyrics": "Sometimes you hear about", "chords": [] },
+        { "lyrics": "A fiery woman without a doubt", "chords": [] },
+        { "lyrics": "She’s the focus of every fight", "chords": [] },
+        { "lyrics": "It’s what she does to me inside", "chords": [] }
+      ]
+    },
+    {
+      "label": "Pre-Chorus",
+      "lines": [
+        { "lyrics": "I hear you calling me", "chords": [] },
+        { "lyrics": "Sweet sound in the night", "chords": [] },
+        { "lyrics": "Take me to your paradise", "chords": [] },
+        { "lyrics": "Take me way up high", "chords": [] }
+      ]
+    },
+    {
+      "label": "Chorus",
+      "lines": [
+        { "lyrics": "My dirty daisy", "chords": [] },
+        { "lyrics": "You know how to drive me crazy", "chords": [] },
+        { "lyrics": "Love your liquorice laces", "chords": [] },
+        { "lyrics": "I might need somebody to save me", "chords": [] },
+        { "lyrics": "Save me", "chords": [] },
+        { "lyrics": "Daisy", "chords": [] },
+        { "lyrics": "Daisy", "chords": [] }
+      ]
+    },
+    {
+      "label": "Verse 2",
+      "lines": [
+        { "lyrics": "You see the Same thing", "chords": [] },
+        { "lyrics": "Throughout history", "chords": [] },
+        { "lyrics": "Love, desire, burning with fire", "chords": [] },
+        { "lyrics": "Cleopatra and Aphrodite", "chords": [] }
+      ]
+    },
+    {
+      "label": "Pre-Chorus",
+      "lines": [
+        { "lyrics": "I hear you calling me", "chords": [] },
+        { "lyrics": "Sweet sound in the night", "chords": [] },
+        { "lyrics": "Take me to your paradise", "chords": [] },
+        { "lyrics": "Take me way up high", "chords": [] }
+      ]
+    },
+    {
+      "label": "Chorus",
+      "lines": [
+        { "lyrics": "My dirty daisy", "chords": [] },
+        { "lyrics": "You know how to drive me crazy", "chords": [] },
+        { "lyrics": "Love your liquorice laces", "chords": [] },
+        { "lyrics": "I might need somebody to save me", "chords": [] },
+        { "lyrics": "Save me", "chords": [] }
+      ]
+    },
+    {
+      "label": "Bridge",
+      "lines": [
+        { "lyrics": "My dirty daisy", "chords": [] },
+        { "lyrics": "My dirty daisy", "chords": [] }
+      ]
+    },
+    {
+      "label": "Chorus",
+      "lines": [
+        { "lyrics": "My dirty daisy", "chords": [] },
+        { "lyrics": "You know how to drive me crazy", "chords": [] },
+        { "lyrics": "Love your liquorice laces", "chords": [] },
+        { "lyrics": "I might need somebody to save me", "chords": [] },
+        { "lyrics": "My dirty daisy", "chords": [] },
+        { "lyrics": "My dirty daisy", "chords": [] }
+      ]
+    },
+    {
+      "label": "Outro",
+      "lines": [
+        { "lyrics": "I might need someone to", "chords": [] },
+        { "lyrics": "Take me away from", "chords": [] },
+        { "lyrics": "You're the one who drives me crazy", "chords": [] }
       ]
     }
   ]

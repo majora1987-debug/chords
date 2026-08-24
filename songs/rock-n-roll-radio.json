@@ -6,10 +6,59 @@
     {
       "label": "Verse 1",
       "lines": [
-        {
-          "lyrics": "Type your lyrics here",
-          "chords": []
-        }
+        { "lyrics": "You hear the sound", "chords": [] },
+        { "lyrics": "Coming from the street", "chords": [] },
+        { "lyrics": "It’s all around", "chords": [] },
+        { "lyrics": "Listen to that beat", "chords": [] }
+      ]
+    },
+    {
+      "label": "Verse 2",
+      "lines": [
+        { "lyrics": "Your skins alive", "chords": [] },
+        { "lyrics": "Pumping in your veins", "chords": [] },
+        { "lyrics": "You dance around", "chords": [] },
+        { "lyrics": "Even in the rain", "chords": [] }
+      ]
+    },
+    {
+      "label": "Chorus",
+      "lines": [
+        { "lyrics": "She loves Rock n roll radio", "chords": [] },
+        { "lyrics": "All night on the stereo", "chords": [] },
+        { "lyrics": "Rock it up", "chords": [] },
+        { "lyrics": "Flying high", "chords": [] },
+        { "lyrics": "Dancing in the dead of night", "chords": [] },
+        { "lyrics": "Give me Rock n roll radio", "chords": [] }
+      ]
+    },
+    {
+      "label": "Verse 3",
+      "lines": [
+        { "lyrics": "Come Take my hand", "chords": [] },
+        { "lyrics": "There’s nothing in our way", "chords": [] },
+        { "lyrics": "Let them pretend", "chords": [] },
+        { "lyrics": "Nothing they can say", "chords": [] }
+      ]
+    },
+    {
+      "label": "Verse 4",
+      "lines": [
+        { "lyrics": "Just turn it up", "chords": [] },
+        { "lyrics": "Like thunder in the sky", "chords": [] },
+        { "lyrics": "It’s all you know", "chords": [] },
+        { "lyrics": "It’s all you need to fly", "chords": [] }
+      ]
+    },
+    {
+      "label": "Chorus",
+      "lines": [
+        { "lyrics": "She loves Rock n roll radio", "chords": [] },
+        { "lyrics": "All night on the stereo", "chords": [] },
+        { "lyrics": "Rock it up", "chords": [] },
+        { "lyrics": "Take it high", "chords": [] },
+        { "lyrics": "Dancing in the dead of night", "chords": [] },
+        { "lyrics": "Give me Rock n roll radio", "chords": [] }
       ]
     }
   ]

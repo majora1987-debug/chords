@@ -6,10 +6,70 @@
     {
       "label": "Verse 1",
       "lines": [
-        {
-          "lyrics": "Type your lyrics here",
-          "chords": []
-        }
+        { "lyrics": "Something strange about you", "chords": [] },
+        { "lyrics": "You don’t have a clue", "chords": [] },
+        { "lyrics": "What you see is what you get", "chords": [] },
+        { "lyrics": "Now not make it news", "chords": [] }
+      ]
+    },
+    {
+      "label": "Verse 2",
+      "lines": [
+        { "lyrics": "Keep people at arms length", "chords": [] },
+        { "lyrics": "Obfuscate the view", "chords": [] },
+        { "lyrics": "Rat out any others", "chords": [] },
+        { "lyrics": "And push on through", "chords": [] }
+      ]
+    },
+    {
+      "label": "Chorus",
+      "lines": [
+        { "lyrics": "A lie", "chords": [] },
+        { "lyrics": "You’re living a lie", "chords": [] },
+        { "lyrics": "All the time", "chords": [] },
+        { "lyrics": "Don’t ask why", "chords": [] },
+        { "lyrics": "You’re living a lie", "chords": [] },
+        { "lyrics": "All the time", "chords": [] }
+      ]
+    },
+    {
+      "label": "Verse 3",
+      "lines": [
+        { "lyrics": "Waking up in a cold sweat", "chords": [] },
+        { "lyrics": "The thought of giving a clue", "chords": [] },
+        { "lyrics": "Slip back under cover", "chords": [] },
+        { "lyrics": "Don’t look like a fool", "chords": [] }
+      ]
+    },
+    {
+      "label": "Verse 4",
+      "lines": [
+        { "lyrics": "Gaslight the remainders", "chords": [] },
+        { "lyrics": "Now they follow through", "chords": [] },
+        { "lyrics": "Spend the rest of your life", "chords": [] },
+        { "lyrics": "Running from the truth", "chords": [] }
+      ]
+    },
+    {
+      "label": "Chorus",
+      "lines": [
+        { "lyrics": "A lie", "chords": [] },
+        { "lyrics": "You’re living a lie", "chords": [] },
+        { "lyrics": "All the time", "chords": [] },
+        { "lyrics": "Don’t ask why", "chords": [] },
+        { "lyrics": "You’re living a lie", "chords": [] },
+        { "lyrics": "All the time", "chords": [] }
+      ]
+    },
+    {
+      "label": "Chorus",
+      "lines": [
+        { "lyrics": "A lie", "chords": [] },
+        { "lyrics": "You’re living a lie", "chords": [] },
+        { "lyrics": "All the time", "chords": [] },
+        { "lyrics": "Don’t ask why", "chords": [] },
+        { "lyrics": "You’re living a lie", "chords": [] },
+        { "lyrics": "All the time", "chords": [] }
       ]
     }
   ]
