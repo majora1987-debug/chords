@@ -1,6 +1,13 @@
 {
   "songs": [
     {
+      "title": "Dirty Daisy",
+      "slug": "dirty-daisy",
+      "key": "",
+      "file": "songs/dirty-daisy.json",
+      "artist": "The Red Ram"
+    },
+    {
       "title": "Icebreaker",
       "slug": "icebreaker",
       "key": "C",
