@@ -7,10 +7,11 @@
       "file": "songs/icebreaker.json"
     },
     {
-      "slug": "lamborghini",
       "title": "Lamborghini",
+      "slug": "lamborghini",
       "key": "",
-      "file": "songs/lamborghini.json"
+      "file": "songs/lamborghini.json",
+      "artist": "The Red Ram"
     }
   ]
 }
