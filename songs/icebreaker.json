@@ -80,12 +80,33 @@
             {
               "wordIndex": 0,
               "chord": "G"
+            },
+            {
+              "wordIndex": 2,
+              "chord": "C"
+            },
+            {
+              "wordIndex": 3,
+              "chord": "F"
             }
           ]
         },
         {
           "lyrics": "Icebreaker, somethin' so cool",
-          "chords": []
+          "chords": [
+            {
+              "wordIndex": 0,
+              "chord": "G"
+            },
+            {
+              "wordIndex": 1,
+              "chord": "C"
+            },
+            {
+              "wordIndex": 2,
+              "chord": "F"
+            }
+          ]
         },
         {
           "lyrics": "Catch a moment from your steely looks and your cross-armed stance",
@@ -121,7 +142,12 @@
         },
         {
           "lyrics": "The feeling",
-          "chords": []
+          "chords": [
+            {
+              "wordIndex": 0,
+              "chord": "G"
+            }
+          ]
         },
         {
           "lyrics": "The lights",
@@ -133,7 +159,16 @@
         },
         {
           "lyrics": "It's you",
-          "chords": []
+          "chords": [
+            {
+              "wordIndex": 0,
+              "chord": "C"
+            },
+            {
+              "wordIndex": 1,
+              "chord": "F"
+            }
+          ]
         },
         {
           "lyrics": "It's me",
@@ -145,7 +180,12 @@
         },
         {
           "lyrics": "Once more we dance",
-          "chords": []
+          "chords": [
+            {
+              "wordIndex": 0,
+              "chord": "G"
+            }
+          ]
         },
         {
           "lyrics": "Fall into a trance",
@@ -153,7 +193,16 @@
         },
         {
           "lyrics": "All I need now is a way to let it be you need a",
-          "chords": []
+          "chords": [
+            {
+              "wordIndex": 2,
+              "chord": "C"
+            },
+            {
+              "wordIndex": 3,
+              "chord": "F"
+            }
+          ]
         },
         {
           "lyrics": "Icebreaker",
