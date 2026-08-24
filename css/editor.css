@@ -312,6 +312,22 @@
     border-radius: var(--radius);
 }
 
+.top-insert-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.toolbar-label {
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-secondary);
+    margin-right: 2px;
+}
+
 .editor-tip {
     font-size: 0.82rem;
     color: var(--color-text-muted);

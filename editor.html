@@ -143,7 +143,12 @@
                 <!-- Edit Mode -->
                 <div id="edit-mode" class="tab-content">
                     <div class="editor-section-toolbar">
-                        <span class="editor-tip">💡 Tip: Drag <strong>⠿</strong> across lines to reposition section dividers. Click above any word to set chords.</span>
+                        <div class="top-insert-actions">
+                            <span class="toolbar-label">Insert at Top:</span>
+                            <button id="add-top-chord-bar-btn" class="btn btn-sm btn-primary" title="Insert a new draggable chord bar at the top of the chart">+ Chord Bar</button>
+                            <button id="add-top-lyrics-btn" class="btn btn-sm" title="Insert a new lyrics line at the top of the chart">+ Lyrics Line</button>
+                            <button id="add-top-sec-btn" class="btn btn-sm" title="Insert a new section at the top of the chart">+ Section</button>
+                        </div>
                         <div class="toolbar-actions">
                             <button id="merge-sections-btn" class="btn btn-sm" title="Combine all sections into one continuous block without losing lyrics">Merge All Sections</button>
                         </div>
@@ -225,7 +230,7 @@
         </div>
     </div>
 
-    <script src="js/chords.js?v=1.7"></script>
-    <script src="js/editor.js?v=1.7"></script>
+    <script src="js/chords.js?v=1.8"></script>
+    <script src="js/editor.js?v=1.8"></script>
 </body>
 </html>

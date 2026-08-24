@@ -791,14 +791,14 @@ window.ChordUtils = (() => {
           });
           controls.appendChild(downBtn);
 
-          // Add Instrumental Chord Progression Bar
+          // Add Instrumental Chord Progression Bar (inserts at top of section)
           const addChordBarBtn = document.createElement('button');
           addChordBarBtn.className = 'sec-ctrl-btn sec-add-bar-btn';
           addChordBarBtn.innerHTML = '+ Chord Bar';
-          addChordBarBtn.title = 'Add an instrumental chord bar/progression (no lyrics)';
+          addChordBarBtn.title = 'Add an instrumental chord bar at the top of this section';
           addChordBarBtn.addEventListener('click', () => {
             if (!section.lines) section.lines = [];
-            section.lines.push({
+            section.lines.unshift({
               type: 'chords',
               chords: [{ chord: 'G' }, { chord: 'C' }],
               comment: '',
@@ -809,14 +809,14 @@ window.ChordUtils = (() => {
           });
           controls.appendChild(addChordBarBtn);
 
-          // Add Lyrics Line
+          // Add Lyrics Line (inserts at top of section)
           const addLineBtn = document.createElement('button');
           addLineBtn.className = 'sec-ctrl-btn';
           addLineBtn.innerHTML = '+ Lyrics';
-          addLineBtn.title = 'Add lyrics line to this section';
+          addLineBtn.title = 'Add lyrics line at the top of this section';
           addLineBtn.addEventListener('click', () => {
             if (!section.lines) section.lines = [];
-            section.lines.push({ lyrics: 'New lyrics line', chords: [] });
+            section.lines.unshift({ lyrics: 'New lyrics line', chords: [] });
             renderSong(song, container, options);
             if (onSongChanged) onSongChanged();
           });

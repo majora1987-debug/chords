@@ -582,16 +582,73 @@ document.addEventListener('DOMContentLoaded', () => {
         switchTab('edit-mode');
     });
 
+    // Top Insert Controls
+    const addTopChordBarBtn = document.getElementById('add-top-chord-bar-btn');
+    if (addTopChordBarBtn) {
+        addTopChordBarBtn.addEventListener('click', () => {
+            if (!currentSong) currentSong = ChordUtils.createSong('', 'C');
+            if (!currentSong.sections || currentSong.sections.length === 0) {
+                currentSong.sections = [{ label: 'Intro', lines: [] }];
+            }
+            if (!currentSong.sections[0].lines) currentSong.sections[0].lines = [];
+            currentSong.sections[0].lines.unshift({
+                type: 'chords',
+                chords: [{ chord: 'G' }, { chord: 'Em' }, { chord: 'C' }, { chord: 'D' }],
+                comment: '(x2)',
+                lyrics: ''
+            });
+            renderCurrentSong();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    }
+
+    const addTopLyricsBtn = document.getElementById('add-top-lyrics-btn');
+    if (addTopLyricsBtn) {
+        addTopLyricsBtn.addEventListener('click', () => {
+            if (!currentSong) currentSong = ChordUtils.createSong('', 'C');
+            if (!currentSong.sections || currentSong.sections.length === 0) {
+                currentSong.sections = [{ label: 'Verse 1', lines: [] }];
+            }
+            if (!currentSong.sections[0].lines) currentSong.sections[0].lines = [];
+            currentSong.sections[0].lines.unshift({
+                lyrics: 'New lyrics line',
+                chords: []
+            });
+            renderCurrentSong();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    }
+
+    const addTopSecBtn = document.getElementById('add-top-sec-btn');
+    if (addTopSecBtn) {
+        addTopSecBtn.addEventListener('click', () => {
+            if (!currentSong) currentSong = ChordUtils.createSong('', 'C');
+            if (!currentSong.sections) currentSong.sections = [];
+            currentSong.sections.unshift({
+                label: 'Intro',
+                lines: [{
+                    type: 'chords',
+                    chords: [{ chord: 'G' }, { chord: 'C' }],
+                    comment: '',
+                    lyrics: ''
+                }]
+            });
+            renderCurrentSong();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    }
+
     const addSectionBtn = document.getElementById('add-section-btn');
     if (addSectionBtn) {
         addSectionBtn.addEventListener('click', () => {
             if (!currentSong) currentSong = ChordUtils.createSong('', 'C');
             if (!currentSong.sections) currentSong.sections = [];
-            currentSong.sections.push({
+            currentSong.sections.unshift({
                 label: 'Chorus',
                 lines: [{ lyrics: 'New lyrics line', chords: [] }]
             });
             renderCurrentSong();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         });
     }
 
@@ -600,7 +657,7 @@ document.addEventListener('DOMContentLoaded', () => {
         addInstSecBtn.addEventListener('click', () => {
             if (!currentSong) currentSong = ChordUtils.createSong('', 'C');
             if (!currentSong.sections) currentSong.sections = [];
-            currentSong.sections.push({
+            currentSong.sections.unshift({
                 label: 'Intro',
                 lines: [{
                     type: 'chords',
@@ -610,6 +667,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }]
             });
             renderCurrentSong();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         });
     }
 
