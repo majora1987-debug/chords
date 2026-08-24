@@ -402,6 +402,7 @@ window.ChordUtils = (() => {
    *   editable          — if true, enables interactive editing
    *   onWordClick       — callback(sectionIndex, lineIndex, wordIndex, slotElement)
    *   onSongChanged     — callback() called whenever sections/lines/labels are modified
+   *   justDroppedSecIdx — optional index of section that was just dropped for settle animation
    */
   function renderSong(song, container, options = {}) {
     const {
@@ -409,6 +410,7 @@ window.ChordUtils = (() => {
       editable = false,
       onWordClick = null,
       onSongChanged = null,
+      justDroppedSecIdx = null,
     } = options;
 
     container.innerHTML = '';
@@ -430,14 +432,6 @@ window.ChordUtils = (() => {
 
     let globalLineCounter = 0;
 
-    // Helper to clear all drop indicator states
-    function clearAllDropIndicators() {
-      container.querySelectorAll('.line-drop-indicator-top, .line-drop-indicator-bottom, .is-dragging')
-        .forEach(el => {
-          el.classList.remove('line-drop-indicator-top', 'line-drop-indicator-bottom', 'is-dragging');
-        });
-    }
-
     song.sections.forEach((section, si) => {
       const secEl = document.createElement('div');
       secEl.className = 'song-section';
@@ -453,70 +447,128 @@ window.ChordUtils = (() => {
       if (hasLabel || editable) {
         const headerRow = document.createElement('div');
         headerRow.className = 'section-header-row';
+        if (justDroppedSecIdx === si) {
+          headerRow.classList.add('just-dropped');
+        }
         if (!hasLabel) headerRow.classList.add('unlabelled-section-header');
 
         if (editable) {
-          // Ultra-smooth Pointer Events Drag Handle
+          // Trello-style Ultra-Smooth Pointer Events Drag Handle
           const dragHandle = document.createElement('span');
           dragHandle.className = 'section-drag-handle';
           dragHandle.innerHTML = '&#x283F;'; // ⠿ symbol
           dragHandle.title = 'Drag to reposition section boundary';
 
-          // Pointer drag implementation for silky 60fps tracking
           dragHandle.addEventListener('pointerdown', (e) => {
             if (e.button !== 0) return; // Left click only
             e.preventDefault();
             e.stopPropagation();
 
-            const labelText = section.label || `Section ${si + 1}`;
+            const startX = e.clientX;
+            const startY = e.clientY;
+            let isDraggingActive = false;
             let currentTargetLineIdx = null;
-            let currentTargetLineEl = null;
-            let currentPlacement = 'top';
+            let placeholderEl = null;
 
-            // Create smooth floating pill
-            const floatingBadge = document.createElement('div');
-            floatingBadge.className = 'drag-floating-pill';
-            floatingBadge.innerHTML = `<span class="pill-icon">&#x283F;</span> <span class="pill-text">${labelText}</span>`;
-            document.body.appendChild(floatingBadge);
+            const labelText = section.label || `Section ${si + 1}`;
+            const lineCount = (section.lines || []).length;
 
-            // Position pill immediately
-            floatingBadge.style.left = `${e.clientX}px`;
-            floatingBadge.style.top = `${e.clientY}px`;
+            // Create smooth Trello-style floating card
+            const floatingCard = document.createElement('div');
+            floatingCard.className = 'trello-drag-card';
+            floatingCard.innerHTML = `
+              <div class="drag-card-header">
+                <span class="drag-card-icon">&#x283F;</span>
+                <span class="drag-card-title">${labelText}</span>
+              </div>
+              <span class="drag-card-badge">${lineCount} line${lineCount === 1 ? '' : 's'}</span>
+            `;
+            floatingCard.style.display = 'none';
+            document.body.appendChild(floatingCard);
 
-            headerRow.classList.add('is-dragging');
-            document.body.classList.add('is-dragging-active');
+            function createPlaceholder() {
+              if (placeholderEl) return placeholderEl;
+              placeholderEl = document.createElement('div');
+              placeholderEl.className = 'trello-drop-placeholder';
+              placeholderEl.innerHTML = `
+                <span class="placeholder-icon">➔</span>
+                <span class="placeholder-text">Place <strong>${labelText}</strong> Here</span>
+              `;
+              return placeholderEl;
+            }
+
+            let rafId = null;
+            let lastX = startX;
+            let lastY = startY;
+
+            function updateFloatingPosition() {
+              floatingCard.style.transform = `translate3d(${lastX}px, ${lastY}px, 0) translate(-50%, -50%) rotate(3deg) scale(1.04)`;
+              rafId = null;
+            }
 
             function onPointerMove(moveEvent) {
               moveEvent.preventDefault();
-              // Update floating pill with smooth translate
-              floatingBadge.style.left = `${moveEvent.clientX}px`;
-              floatingBadge.style.top = `${moveEvent.clientY}px`;
+              lastX = moveEvent.clientX;
+              lastY = moveEvent.clientY;
 
-              // Find element under pointer
-              floatingBadge.style.display = 'none'; // Temporarily hide to raycast
+              // Activate drag after 3px movement threshold
+              if (!isDraggingActive) {
+                const dist = Math.hypot(moveEvent.clientX - startX, moveEvent.clientY - startY);
+                if (dist > 3) {
+                  isDraggingActive = true;
+                  floatingCard.style.display = 'flex';
+                  headerRow.classList.add('is-dragging');
+                  secEl.classList.add('is-dragging-source');
+                  document.body.classList.add('is-dragging-active');
+                  createPlaceholder();
+                }
+              }
+
+              if (!isDraggingActive) return;
+
+              if (!rafId) {
+                rafId = requestAnimationFrame(updateFloatingPosition);
+              }
+
+              // Raycast to find target line under cursor
+              floatingCard.style.display = 'none';
               const elemBelow = document.elementFromPoint(moveEvent.clientX, moveEvent.clientY);
-              floatingBadge.style.display = '';
-
-              clearAllDropIndicators();
-              currentTargetLineIdx = null;
-              currentTargetLineEl = null;
+              floatingCard.style.display = 'flex';
 
               if (elemBelow) {
                 const lineEl = elemBelow.closest('.song-line');
                 if (lineEl && container.contains(lineEl)) {
-                  currentTargetLineEl = lineEl;
                   const gIdx = parseInt(lineEl.dataset.globalLineIndex, 10);
                   const rect = lineEl.getBoundingClientRect();
                   const isTopHalf = (moveEvent.clientY - rect.top) < (rect.height / 2);
 
+                  const ph = createPlaceholder();
+
                   if (isTopHalf) {
-                    lineEl.classList.add('line-drop-indicator-top');
+                    if (ph.nextSibling !== lineEl) {
+                      lineEl.parentNode.insertBefore(ph, lineEl);
+                    }
                     currentTargetLineIdx = gIdx;
-                    currentPlacement = 'top';
                   } else {
-                    lineEl.classList.add('line-drop-indicator-bottom');
+                    if (ph.previousSibling !== lineEl) {
+                      lineEl.parentNode.insertBefore(ph, lineEl.nextSibling);
+                    }
                     currentTargetLineIdx = gIdx + 1;
-                    currentPlacement = 'bottom';
+                  }
+                } else {
+                  // If hovering directly over a section header
+                  const headerEl = elemBelow.closest('.section-header-row');
+                  if (headerEl && container.contains(headerEl) && headerEl !== headerRow) {
+                    const sec = headerEl.closest('.song-section');
+                    if (sec) {
+                      const firstLine = sec.querySelector('.song-line');
+                      if (firstLine) {
+                        const gIdx = parseInt(firstLine.dataset.globalLineIndex, 10);
+                        const ph = createPlaceholder();
+                        sec.insertBefore(ph, headerEl.nextSibling);
+                        currentTargetLineIdx = gIdx;
+                      }
+                    }
                   }
                 }
               }
@@ -527,18 +579,23 @@ window.ChordUtils = (() => {
               document.removeEventListener('pointerup', onPointerUp);
               document.removeEventListener('pointercancel', onPointerUp);
 
+              if (rafId) cancelAnimationFrame(rafId);
               document.body.classList.remove('is-dragging-active');
-              if (floatingBadge && floatingBadge.parentNode) {
-                floatingBadge.parentNode.removeChild(floatingBadge);
-              }
-              clearAllDropIndicators();
 
-              if (currentTargetLineIdx !== null && !isNaN(currentTargetLineIdx)) {
+              if (floatingCard && floatingCard.parentNode) {
+                floatingCard.parentNode.removeChild(floatingCard);
+              }
+              if (placeholderEl && placeholderEl.parentNode) {
+                placeholderEl.parentNode.removeChild(placeholderEl);
+              }
+
+              if (isDraggingActive && currentTargetLineIdx !== null && !isNaN(currentTargetLineIdx)) {
                 moveSectionHeaderToLine(song, si, currentTargetLineIdx);
-                renderSong(song, container, options);
+                renderSong(song, container, { ...options, justDroppedSecIdx: si });
                 if (onSongChanged) onSongChanged();
               } else {
                 headerRow.classList.remove('is-dragging');
+                secEl.classList.remove('is-dragging-source');
               }
             }
 
