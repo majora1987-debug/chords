@@ -63,10 +63,17 @@
                     <h2 id="detail-title">Song Title</h2>
                     <span id="detail-key" class="badge">Key: C</span>
                 </div>
-                <div class="transpose-controls">
-                    <button id="transpose-down" class="btn btn-icon" title="Transpose Down">-</button>
-                    <span id="transpose-indicator">0</span>
-                    <button id="transpose-up" class="btn btn-icon" title="Transpose Up">+</button>
+                <div class="detail-actions">
+                    <div class="font-size-controls" title="Adjust Text Size">
+                        <button id="font-size-down" class="btn btn-icon" title="Decrease Text Size">A−</button>
+                        <span id="font-size-indicator">100%</span>
+                        <button id="font-size-up" class="btn btn-icon" title="Increase Text Size">A+</button>
+                    </div>
+                    <div class="transpose-controls" title="Transpose Key">
+                        <button id="transpose-down" class="btn btn-icon" title="Transpose Down">−</button>
+                        <span id="transpose-indicator">0</span>
+                        <button id="transpose-up" class="btn btn-icon" title="Transpose Up">+</button>
+                    </div>
                 </div>
             </div>
             <div id="chord-chart" class="chord-chart-container">
@@ -86,7 +93,7 @@
         <p>&copy; <span id="current-year"></span> The Red Ram</p>
     </footer>
 
-    <script src="js/chords.js?v=1.4"></script>
-    <script src="js/viewer.js?v=1.4"></script>
+    <script src="js/chords.js?v=1.5"></script>
+    <script src="js/viewer.js?v=1.5"></script>
 </body>
 </html>

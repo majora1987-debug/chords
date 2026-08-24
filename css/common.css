@@ -548,7 +548,7 @@ body.is-dragging-active * {
 }
 
 .section-label {
-  font-size: 0.78rem;
+  font-size: calc(0.78rem * var(--chord-font-scale, 1));
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -730,14 +730,14 @@ body.is-dragging-active * {
 .chord-slot {
   font-family: var(--font-chord);
   font-weight: 800;
-  font-size: 0.9rem;
+  font-size: calc(0.9rem * var(--chord-font-scale, 1));
   letter-spacing: 0.02em;
   color: var(--color-chord);
   min-height: 1.4em;
   line-height: 1.4;
   white-space: nowrap;
   user-select: none;
-  transition: all 0.12s ease;
+  transition: font-size 0.15s ease, color 0.12s ease;
 }
 
 .chord-slot:not(.has-chord) {
@@ -775,11 +775,12 @@ body.is-dragging-active * {
 
 .word-text {
   font-family: var(--font-lyrics);
-  font-size: 1.15rem;
+  font-size: calc(1.15rem * var(--chord-font-scale, 1));
   font-weight: 500;
   line-height: 1.5;
   color: var(--color-text);
   letter-spacing: -0.01em;
+  transition: font-size 0.15s ease;
 }
 
 /* --- Layout & Footer --- */

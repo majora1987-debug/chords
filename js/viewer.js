@@ -28,6 +28,11 @@ document.addEventListener('DOMContentLoaded', () => {
         transposeUpBtn: document.getElementById('transpose-up'),
         transposeDownBtn: document.getElementById('transpose-down'),
         transposeIndicator: document.getElementById('transpose-indicator'),
+
+        // Text Size
+        fontSizeDownBtn: document.getElementById('font-size-down'),
+        fontSizeUpBtn: document.getElementById('font-size-up'),
+        fontSizeIndicator: document.getElementById('font-size-indicator'),
     };
 
     // State
@@ -35,11 +40,24 @@ document.addEventListener('DOMContentLoaded', () => {
         songs: [],
         currentSong: null,
         currentTranspose: 0,
-        originalKey: null
+        originalKey: null,
+        fontScale: parseFloat(localStorage.getItem('redram-font-scale')) || 1.0
     };
+
+    // Apply text size scale to chord chart
+    function applyFontScale() {
+        if (elements.chordChart) {
+            elements.chordChart.style.setProperty('--chord-font-scale', state.fontScale);
+        }
+        if (elements.fontSizeIndicator) {
+            elements.fontSizeIndicator.textContent = Math.round(state.fontScale * 100) + '%';
+        }
+        localStorage.setItem('redram-font-scale', state.fontScale);
+    }
 
     // Initialization
     async function init() {
+        applyFontScale();
         setupEventListeners();
         await loadSongs();
         handleRoute();
@@ -70,6 +88,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 updateDetailView();
             }
         });
+
+        if (elements.fontSizeUpBtn) {
+            elements.fontSizeUpBtn.addEventListener('click', () => {
+                if (state.fontScale < 1.8) {
+                    state.fontScale = Math.round((state.fontScale + 0.1) * 10) / 10;
+                    applyFontScale();
+                }
+            });
+        }
+
+        if (elements.fontSizeDownBtn) {
+            elements.fontSizeDownBtn.addEventListener('click', () => {
+                if (state.fontScale > 0.6) {
+                    state.fontScale = Math.round((state.fontScale - 0.1) * 10) / 10;
+                    applyFontScale();
+                }
+            });
+        }
     }
 
     // Fetch Songs
@@ -230,6 +266,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 transpose: state.currentTranspose,
                 editable: false
             });
+            applyFontScale();
         } else {
             elements.chordChart.innerHTML = '<p>Error: ChordUtils not found or missing renderSong function.</p>';
         }
