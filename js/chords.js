@@ -469,6 +469,41 @@ window.ChordUtils = (() => {
   }
 
   /**
+   * Move an individual line (instrumental chord bar or lyric line) to a specific global line index.
+   */
+  function moveLineToPosition(song, fromSecIdx, fromLineIdx, targetGlobalLineIdx) {
+    if (!song || !song.sections || song.sections.length === 0) return;
+
+    const sourceSec = song.sections[fromSecIdx];
+    if (!sourceSec || !sourceSec.lines || !sourceSec.lines[fromLineIdx]) return;
+
+    const [movedLine] = sourceSec.lines.splice(fromLineIdx, 1);
+
+    let currentGlobalCount = 0;
+    let targetSecIdx = song.sections.length - 1;
+    let targetLineIdx = (song.sections[targetSecIdx].lines || []).length;
+
+    for (let si = 0; si < song.sections.length; si++) {
+      const secLines = song.sections[si].lines || [];
+      if (targetGlobalLineIdx <= currentGlobalCount + secLines.length) {
+        targetSecIdx = si;
+        targetLineIdx = Math.max(0, targetGlobalLineIdx - currentGlobalCount);
+        break;
+      }
+      currentGlobalCount += secLines.length;
+    }
+
+    if (!song.sections[targetSecIdx].lines) song.sections[targetSecIdx].lines = [];
+    song.sections[targetSecIdx].lines.splice(targetLineIdx, 0, movedLine);
+
+    // Clean up empty unlabelled sections
+    song.sections = song.sections.filter(sec => (sec.label && sec.label.trim()) || (sec.lines && sec.lines.length > 0));
+    if (song.sections.length === 0) {
+      song.sections = [{ label: '', lines: [movedLine] }];
+    }
+  }
+
+  /**
    * Render a song into a container DOM element.
    *
    * Options:
@@ -938,8 +973,154 @@ window.ChordUtils = (() => {
 
           instLineEl.appendChild(grid);
 
-          // Line actions
+          // Line actions & Drag Handle
           if (editable) {
+            const lineDragHandle = document.createElement('span');
+            lineDragHandle.className = 'line-drag-handle';
+            lineDragHandle.innerHTML = '&#x283F;'; // ⠿ symbol
+            lineDragHandle.title = 'Drag to reposition this chord bar anywhere in the song';
+
+            lineDragHandle.addEventListener('pointerdown', (e) => {
+              if (e.button !== 0) return;
+              e.preventDefault();
+              e.stopPropagation();
+
+              const startX = e.clientX;
+              const startY = e.clientY;
+              let isDraggingActive = false;
+              let currentTargetLineIdx = null;
+              let placeholderEl = null;
+
+              const chordsSummary = (line.chords || []).map(c => c.chord || '-').join(' | ');
+              const barText = `| ${chordsSummary} |` + (line.comment ? ` ${line.comment}` : '');
+
+              const floatingCard = document.createElement('div');
+              floatingCard.className = 'trello-drag-card';
+              floatingCard.innerHTML = `
+                <div class="drag-card-header">
+                  <span class="drag-card-icon">&#x283F;</span>
+                  <span class="drag-card-title">${barText}</span>
+                </div>
+                <span class="drag-card-badge">Chord Bar</span>
+              `;
+              floatingCard.style.display = 'none';
+              document.body.appendChild(floatingCard);
+
+              function createPlaceholder() {
+                if (placeholderEl) return placeholderEl;
+                placeholderEl = document.createElement('div');
+                placeholderEl.className = 'trello-drop-placeholder';
+                placeholderEl.innerHTML = `
+                  <span class="placeholder-icon">➔</span>
+                  <span class="placeholder-text">Place Chord Bar <strong>${barText}</strong> Here</span>
+                `;
+                return placeholderEl;
+              }
+
+              let rafId = null;
+              let lastX = startX;
+              let lastY = startY;
+
+              function updateFloatingPosition() {
+                floatingCard.style.transform = `translate3d(${lastX}px, ${lastY}px, 0) translate(-50%, -50%) rotate(2.5deg) scale(1.04)`;
+                rafId = null;
+              }
+
+              function onPointerMove(moveEvent) {
+                moveEvent.preventDefault();
+                lastX = moveEvent.clientX;
+                lastY = moveEvent.clientY;
+
+                if (!isDraggingActive) {
+                  const dist = Math.hypot(moveEvent.clientX - startX, moveEvent.clientY - startY);
+                  if (dist > 3) {
+                    isDraggingActive = true;
+                    floatingCard.style.display = 'flex';
+                    instLineEl.classList.add('is-dragging-source');
+                    document.body.classList.add('is-dragging-active');
+                    createPlaceholder();
+                  }
+                }
+
+                if (!isDraggingActive) return;
+
+                if (!rafId) {
+                  rafId = requestAnimationFrame(updateFloatingPosition);
+                }
+
+                floatingCard.style.display = 'none';
+                const elemBelow = document.elementFromPoint(moveEvent.clientX, moveEvent.clientY);
+                floatingCard.style.display = 'flex';
+
+                if (elemBelow) {
+                  const targetLine = elemBelow.closest('.song-line');
+                  if (targetLine && container.contains(targetLine)) {
+                    const gIdx = parseInt(targetLine.dataset.globalLineIndex, 10);
+                    const rect = targetLine.getBoundingClientRect();
+                    const isTopHalf = (moveEvent.clientY - rect.top) < (rect.height / 2);
+
+                    const ph = createPlaceholder();
+
+                    if (isTopHalf) {
+                      if (ph.nextSibling !== targetLine) {
+                        targetLine.parentNode.insertBefore(ph, targetLine);
+                      }
+                      currentTargetLineIdx = gIdx;
+                    } else {
+                      if (ph.previousSibling !== targetLine) {
+                        targetLine.parentNode.insertBefore(ph, targetLine.nextSibling);
+                      }
+                      currentTargetLineIdx = gIdx + 1;
+                    }
+                  } else {
+                    const headerEl = elemBelow.closest('.section-header-row');
+                    if (headerEl && container.contains(headerEl)) {
+                      const sec = headerEl.closest('.song-section');
+                      if (sec) {
+                        const firstLine = sec.querySelector('.song-line');
+                        if (firstLine) {
+                          const gIdx = parseInt(firstLine.dataset.globalLineIndex, 10);
+                          const ph = createPlaceholder();
+                          sec.insertBefore(ph, headerEl.nextSibling);
+                          currentTargetLineIdx = gIdx;
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+
+              function onPointerUp(upEvent) {
+                document.removeEventListener('pointermove', onPointerMove);
+                document.removeEventListener('pointerup', onPointerUp);
+                document.removeEventListener('pointercancel', onPointerUp);
+
+                if (rafId) cancelAnimationFrame(rafId);
+                document.body.classList.remove('is-dragging-active');
+
+                if (floatingCard && floatingCard.parentNode) {
+                  floatingCard.parentNode.removeChild(floatingCard);
+                }
+                if (placeholderEl && placeholderEl.parentNode) {
+                  placeholderEl.parentNode.removeChild(placeholderEl);
+                }
+
+                if (isDraggingActive && currentTargetLineIdx !== null && !isNaN(currentTargetLineIdx)) {
+                  moveLineToPosition(song, si, li, currentTargetLineIdx);
+                  renderSong(song, container, options);
+                  if (onSongChanged) onSongChanged();
+                } else {
+                  instLineEl.classList.remove('is-dragging-source');
+                }
+              }
+
+              document.addEventListener('pointermove', onPointerMove, { passive: false });
+              document.addEventListener('pointerup', onPointerUp);
+              document.addEventListener('pointercancel', onPointerUp);
+            });
+
+            instLineEl.prepend(lineDragHandle);
+
             const lineActions = document.createElement('span');
             lineActions.className = 'line-actions';
 
