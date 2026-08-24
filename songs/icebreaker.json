@@ -4,73 +4,108 @@
   "key": "",
   "sections": [
     {
-      "label": "Verse 1",
+      "label": "",
       "lines": [
-        { "lyrics": "When it's approaching 1am, you've got nothing to show", "chords": [] },
-        { "lyrics": "You need somethin' more than the vision in your head", "chords": [] }
-      ]
-    },
-    {
-      "label": "Verse 2",
-      "lines": [
-        { "lyrics": "Talkin' in the mirror and it's all come to this", "chords": [] },
-        { "lyrics": "Dreamin' of a moment that I can steal a kiss", "chords": [] }
-      ]
-    },
-    {
-      "label": "Chorus",
-      "lines": [
-        { "lyrics": "Icebreaker, to put you in the mood", "chords": [] },
-        { "lyrics": "Icebreaker, somethin' so cool", "chords": [] }
-      ]
-    },
-    {
-      "label": "Verse 3",
-      "lines": [
-        { "lyrics": "Catch a moment from your steely looks and your cross-armed stance", "chords": [] },
-        { "lyrics": "Now it's time we took a chance", "chords": [] }
-      ]
-    },
-    {
-      "label": "Verse 4",
-      "lines": [
-        { "lyrics": "When looking cool only works in school", "chords": [] },
-        { "lyrics": "And now it's time you shoot your shot", "chords": [] },
-        { "lyrics": "You need a", "chords": [] }
-      ]
-    },
-    {
-      "label": "Chorus",
-      "lines": [
-        { "lyrics": "Icebreaker, to put you in the mood", "chords": [] },
-        { "lyrics": "Icebreaker, somethin' so cool", "chords": [] }
-      ]
-    },
-    {
-      "label": "Bridge",
-      "lines": [
-        { "lyrics": "Oh yeah it's cool", "chords": [] }
-      ]
-    },
-    {
-      "label": "Bridge 2",
-      "lines": [
-        { "lyrics": "The feeling", "chords": [] },
-        { "lyrics": "The lights", "chords": [] },
-        { "lyrics": "The mood into the night", "chords": [] },
-        { "lyrics": "It's you", "chords": [] },
-        { "lyrics": "It's me", "chords": [] },
-        { "lyrics": "The way it could be", "chords": [] },
-        { "lyrics": "Once more we dance", "chords": [] },
-        { "lyrics": "Fall into a trance", "chords": [] },
-        { "lyrics": "All I need now is a way to let it be you need a", "chords": [] }
-      ]
-    },
-    {
-      "label": "Outro",
-      "lines": [
-        { "lyrics": "Icebreaker", "chords": [] },
-        { "lyrics": "Icebreaker, to put you in the mood", "chords": [] }
+        {
+          "lyrics": "When it's approaching 1am, you've got nothing to show",
+          "chords": []
+        },
+        {
+          "lyrics": "You need somethin' more than the vision in your head",
+          "chords": []
+        },
+        {
+          "lyrics": "Talkin' in the mirror and it's all come to this",
+          "chords": []
+        },
+        {
+          "lyrics": "Dreamin' of a moment that I can steal a kiss",
+          "chords": []
+        },
+        {
+          "lyrics": "Icebreaker, to put you in the mood",
+          "chords": []
+        },
+        {
+          "lyrics": "Icebreaker, somethin' so cool",
+          "chords": []
+        },
+        {
+          "lyrics": "Catch a moment from your steely looks and your cross-armed stance",
+          "chords": []
+        },
+        {
+          "lyrics": "Now it's time we took a chance",
+          "chords": []
+        },
+        {
+          "lyrics": "When looking cool only works in school",
+          "chords": []
+        },
+        {
+          "lyrics": "And now it's time you shoot your shot",
+          "chords": []
+        },
+        {
+          "lyrics": "You need a",
+          "chords": []
+        },
+        {
+          "lyrics": "Icebreaker, to put you in the mood",
+          "chords": []
+        },
+        {
+          "lyrics": "Icebreaker, somethin' so cool",
+          "chords": []
+        },
+        {
+          "lyrics": "Oh yeah it's cool",
+          "chords": []
+        },
+        {
+          "lyrics": "The feeling",
+          "chords": []
+        },
+        {
+          "lyrics": "The lights",
+          "chords": []
+        },
+        {
+          "lyrics": "The mood into the night",
+          "chords": []
+        },
+        {
+          "lyrics": "It's you",
+          "chords": []
+        },
+        {
+          "lyrics": "It's me",
+          "chords": []
+        },
+        {
+          "lyrics": "The way it could be",
+          "chords": []
+        },
+        {
+          "lyrics": "Once more we dance",
+          "chords": []
+        },
+        {
+          "lyrics": "Fall into a trance",
+          "chords": []
+        },
+        {
+          "lyrics": "All I need now is a way to let it be you need a",
+          "chords": []
+        },
+        {
+          "lyrics": "Icebreaker",
+          "chords": []
+        },
+        {
+          "lyrics": "Icebreaker, to put you in the mood",
+          "chords": []
+        }
       ]
     }
   ]
