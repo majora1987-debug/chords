@@ -1,6 +1,67 @@
 // js/editor.js
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Security & Auth Gate (Salted SHA-256)
+    const AUTH_SALT = 'redram-band-chords-2026';
+    const EXPECTED_HASH = '014fb5c871aaf2685432bbab86d9a165fc06ec3d427d5e85f64af7fd8051bdba';
+
+    const authGate = document.getElementById('auth-gate');
+    const editorApp = document.getElementById('editor-app');
+    const authForm = document.getElementById('auth-form');
+    const adminPasswordInput = document.getElementById('admin-password-input');
+    const authErrorMsg = document.getElementById('auth-error-msg');
+    const lockEditorBtn = document.getElementById('lock-editor-btn');
+
+    async function hashPasscode(pwd) {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(AUTH_SALT + pwd);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    function checkAuth() {
+        const currentToken = localStorage.getItem('redram-auth');
+        if (currentToken === EXPECTED_HASH) {
+            authGate.classList.add('hidden');
+            editorApp.classList.remove('hidden');
+            loadSettings();
+            loadSongList();
+        } else {
+            authGate.classList.remove('hidden');
+            editorApp.classList.add('hidden');
+            if (adminPasswordInput) {
+                adminPasswordInput.value = '';
+                adminPasswordInput.focus();
+            }
+        }
+    }
+
+    if (authForm) {
+        authForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            authErrorMsg.classList.add('hidden');
+            const inputVal = adminPasswordInput.value;
+            const computedHash = await hashPasscode(inputVal);
+
+            if (computedHash === EXPECTED_HASH) {
+                localStorage.setItem('redram-auth', computedHash);
+                checkAuth();
+            } else {
+                authErrorMsg.classList.remove('hidden');
+                adminPasswordInput.value = '';
+                adminPasswordInput.focus();
+            }
+        });
+    }
+
+    if (lockEditorBtn) {
+        lockEditorBtn.addEventListener('click', () => {
+            localStorage.removeItem('redram-auth');
+            checkAuth();
+        });
+    }
+
     // State
     let currentSong = null;
     let currentSongSha = null;
@@ -667,6 +728,5 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Init
-    loadSettings();
-    loadSongList();
+    checkAuth();
 });
