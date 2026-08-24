@@ -1,10 +1,11 @@
 {
   "songs": [
     {
-      "slug": "icebreaker",
       "title": "Icebreaker",
-      "key": "",
-      "file": "songs/icebreaker.json"
+      "slug": "icebreaker",
+      "key": "C",
+      "file": "songs/icebreaker.json",
+      "artist": "The Red Ram"
     },
     {
       "title": "Lamborghini",
