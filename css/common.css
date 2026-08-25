@@ -329,41 +329,56 @@ body {
   font-size: 0.7rem;
 }
 
-/* --- Modern Buttons --- */
-.btn {
+/* --- Modern Buttons (Rounded Pill Design Language) --- */
+.btn,
+.primary-btn,
+.btn-primary,
+.secondary-btn,
+.danger-btn,
+button.primary-btn,
+button.btn-primary,
+button.secondary-btn,
+button.danger-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  min-height: 38px;
-  padding: 0.5rem 1rem;
+  min-height: 40px;
+  padding: 0.55rem 1.35rem;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius);
+  border-radius: var(--radius-pill) !important;
   background: var(--color-surface);
   color: var(--color-text);
   font-family: var(--font-ui);
-  font-size: 0.875rem;
-  font-weight: 600;
+  font-size: 0.88rem;
+  font-weight: 700;
   cursor: pointer;
   text-decoration: none;
-  transition: all 0.15s ease;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
   box-shadow: var(--shadow-subtle);
   user-select: none;
 }
 
-.btn:hover {
+.btn:hover,
+.secondary-btn:hover {
   background: var(--color-surface-hover);
   border-color: var(--color-accent);
   color: var(--color-accent);
-  transform: translateY(-1px);
+  transform: translateY(-1.5px);
   box-shadow: var(--shadow-sm);
 }
 
-.btn:active {
-  transform: translateY(0) scale(0.98);
+.btn:active,
+.primary-btn:active,
+.secondary-btn:active,
+.danger-btn:active {
+  transform: translateY(0) scale(0.97);
 }
 
-.btn:disabled {
+.btn:disabled,
+.primary-btn:disabled,
+.secondary-btn:disabled,
+.danger-btn:disabled {
   opacity: 0.45;
   cursor: not-allowed;
   transform: none !important;
@@ -373,28 +388,35 @@ body {
 .btn-primary, .primary-btn {
   background: var(--color-accent-gradient) !important;
   color: #ffffff !important;
-  border-color: transparent !important;
-  box-shadow: 0 4px 12px rgba(225, 29, 72, 0.3) !important;
+  border: 1px solid transparent !important;
+  box-shadow: 0 4px 14px rgba(225, 29, 72, 0.35) !important;
 }
 
 .btn-primary:hover, .primary-btn:hover {
   opacity: 0.95;
-  transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(225, 29, 72, 0.4) !important;
+  color: #ffffff !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(225, 29, 72, 0.45) !important;
+}
+
+.secondary-btn {
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
 }
 
 .btn-sm {
-  min-height: 32px;
-  padding: 0.35rem 0.75rem;
-  font-size: 0.8rem;
-  border-radius: var(--radius-sm);
+  min-height: 34px;
+  padding: 0.4rem 1rem;
+  font-size: 0.82rem;
+  border-radius: var(--radius-pill) !important;
 }
 
 .btn-icon {
   min-height: 36px;
   min-width: 36px;
   padding: 0.4rem;
-  border-radius: var(--radius);
+  border-radius: var(--radius-pill) !important;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -403,12 +425,14 @@ body {
 .danger-btn {
   background: rgba(239, 68, 68, 0.1) !important;
   color: #ef4444 !important;
-  border-color: rgba(239, 68, 68, 0.25) !important;
+  border: 1px solid rgba(239, 68, 68, 0.25) !important;
 }
 
 .danger-btn:hover {
   background: #ef4444 !important;
   color: #ffffff !important;
+  transform: translateY(-1.5px);
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.35) !important;
 }
 
 /* Status Badges */
