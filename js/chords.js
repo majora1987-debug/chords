@@ -826,43 +826,36 @@ window.ChordUtils = (() => {
           });
           controls.appendChild(addLineBtn);
 
-          // Remove Section Header (Preserving all lyrics & chords)
-          if (hasLabel) {
-            const removeLabelBtn = document.createElement('button');
-            removeLabelBtn.className = 'sec-ctrl-btn';
-            removeLabelBtn.innerHTML = '✕ Label';
-            removeLabelBtn.title = 'Remove section header (keeps all lines intact)';
-            removeLabelBtn.addEventListener('click', () => {
-              section.label = '';
-              if (si > 0) {
-                song.sections[si - 1].lines.push(...section.lines);
-                song.sections.splice(si, 1);
-              }
-              renderSong(song, container, options);
-              if (onSongChanged) onSongChanged();
-            });
-            controls.appendChild(removeLabelBtn);
-          }
-
-          // Delete Section (prompt)
+          // Remove Section Heading (Preserves all lyrics & chords)
           const delBtn = document.createElement('button');
           delBtn.className = 'sec-ctrl-btn sec-delete-btn';
           delBtn.innerHTML = window.UI ? window.UI.icon('trash') : '🗑️';
-          delBtn.title = 'Delete section and all its lines';
-          delBtn.setAttribute('aria-label', 'Delete section');
-          delBtn.addEventListener('click', async () => {
-            const secName = section.label || 'Section ' + (si + 1);
-            let ok = false;
-            if (window.UI && typeof window.UI.confirm === 'function') {
-              ok = await window.UI.confirm('Delete Section', `Are you sure you want to delete "${secName}" and all its lines?`, true);
-            } else {
-              ok = confirm(`Delete section "${secName}" and its lines?`);
-            }
-            if (ok) {
+          delBtn.title = 'Remove section heading (preserves all lyrics & chords)';
+          delBtn.setAttribute('aria-label', 'Remove section heading');
+          delBtn.addEventListener('click', () => {
+            const secName = section.label || `Section ${si + 1}`;
+            const secLines = section.lines || [];
+            
+            if (si > 0) {
+              // Merge lines into the preceding section
+              if (!song.sections[si - 1].lines) song.sections[si - 1].lines = [];
+              song.sections[si - 1].lines.push(...secLines);
               song.sections.splice(si, 1);
-              renderSong(song, container, options);
-              if (onSongChanged) onSongChanged();
+            } else if (song.sections.length > 1) {
+              // First section: merge lines into the following section
+              if (!song.sections[1].lines) song.sections[1].lines = [];
+              song.sections[1].lines.unshift(...secLines);
+              song.sections.splice(0, 1);
+            } else {
+              // Only 1 section in song: simply clear the label
+              section.label = '';
             }
+
+            renderSong(song, container, options);
+            if (window.UI && typeof window.UI.toast === 'function') {
+              window.UI.toast(`Removed "${secName}" heading (lyrics preserved)`, { type: 'info' });
+            }
+            if (onSongChanged) onSongChanged();
           });
           controls.appendChild(delBtn);
 
