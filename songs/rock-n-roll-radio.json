@@ -1,64 +1,255 @@
 {
   "title": "Rock n roll radio",
   "artist": "The Red Ram",
-  "key": "",
+  "key": "E",
   "sections": [
     {
-      "label": "Verse 1",
+      "label": "",
       "lines": [
-        { "lyrics": "You hear the sound", "chords": [] },
-        { "lyrics": "Coming from the street", "chords": [] },
-        { "lyrics": "It’s all around", "chords": [] },
-        { "lyrics": "Listen to that beat", "chords": [] }
+        {
+          "type": "chords",
+          "chords": [
+            {
+              "chord": "E"
+            },
+            {
+              "chord": "F#5"
+            },
+            {
+              "chord": "G5"
+            },
+            {
+              "chord": "A5"
+            }
+          ],
+          "comment": "",
+          "lyrics": ""
+        },
+        {
+          "lyrics": "You hear the sound",
+          "chords": [
+            {
+              "wordIndex": 0,
+              "chord": "E"
+            },
+            {
+              "wordIndex": 1,
+              "chord": "F#5"
+            },
+            {
+              "wordIndex": 2,
+              "chord": "G5"
+            },
+            {
+              "wordIndex": 3,
+              "chord": "A5"
+            }
+          ]
+        },
+        {
+          "lyrics": "Coming from the street",
+          "chords": []
+        },
+        {
+          "lyrics": "It’s all around",
+          "chords": []
+        },
+        {
+          "lyrics": "Listen to that beat",
+          "chords": []
+        },
+        {
+          "lyrics": "Your skins alive",
+          "chords": []
+        },
+        {
+          "lyrics": "Pumping in your veins",
+          "chords": []
+        },
+        {
+          "lyrics": "You dance around",
+          "chords": []
+        },
+        {
+          "lyrics": "Even in the rain",
+          "chords": []
+        },
+        {
+          "lyrics": "She loves Rock n roll radio",
+          "chords": [
+            {
+              "wordIndex": 0,
+              "chord": "A"
+            },
+            {
+              "wordIndex": 5,
+              "chord": "E5"
+            }
+          ]
+        },
+        {
+          "lyrics": "All night on the stereo",
+          "chords": [
+            {
+              "wordIndex": 0,
+              "chord": "A"
+            },
+            {
+              "wordIndex": 4,
+              "chord": "E5"
+            }
+          ]
+        },
+        {
+          "lyrics": "Rock it up",
+          "chords": [
+            {
+              "wordIndex": 0,
+              "chord": "A"
+            }
+          ]
+        },
+        {
+          "lyrics": "Flying high",
+          "chords": [
+            {
+              "wordIndex": 0,
+              "chord": "Asus4"
+            }
+          ]
+        },
+        {
+          "lyrics": "Dancing in the dead of night",
+          "chords": [
+            {
+              "wordIndex": 0,
+              "chord": "E"
+            },
+            {
+              "wordIndex": 5,
+              "chord": "Esus4"
+            }
+          ]
+        },
+        {
+          "lyrics": "Give me Rock n roll radio",
+          "chords": [
+            {
+              "wordIndex": 0,
+              "chord": "A"
+            },
+            {
+              "wordIndex": 5,
+              "chord": "E5"
+            }
+          ]
+        },
+        {
+          "lyrics": "Come Take my hand",
+          "chords": [
+            {
+              "wordIndex": 0,
+              "chord": "E"
+            },
+            {
+              "wordIndex": 1,
+              "chord": "F#5"
+            },
+            {
+              "wordIndex": 2,
+              "chord": "G5"
+            },
+            {
+              "wordIndex": 3,
+              "chord": "A"
+            }
+          ]
+        },
+        {
+          "lyrics": "There’s nothing in our way",
+          "chords": []
+        },
+        {
+          "lyrics": "Let them pretend",
+          "chords": []
+        },
+        {
+          "lyrics": "Nothing they can say",
+          "chords": []
+        },
+        {
+          "lyrics": "Just turn it up",
+          "chords": []
+        },
+        {
+          "lyrics": "Like thunder in the sky",
+          "chords": []
+        },
+        {
+          "lyrics": "It’s all you know",
+          "chords": []
+        },
+        {
+          "lyrics": "It’s all you need to fly",
+          "chords": []
+        },
+        {
+          "lyrics": "She loves Rock n roll radio",
+          "chords": [
+            {
+              "wordIndex": 0,
+              "chord": "A"
+            },
+            {
+              "wordIndex": 5,
+              "chord": "E5"
+            }
+          ]
+        },
+        {
+          "lyrics": "All night on the stereo",
+          "chords": []
+        },
+        {
+          "lyrics": "Rock it up",
+          "chords": []
+        },
+        {
+          "lyrics": "Take it high",
+          "chords": []
+        },
+        {
+          "lyrics": "Dancing in the dead of night",
+          "chords": []
+        },
+        {
+          "lyrics": "Give me Rock n roll radio",
+          "chords": []
+        }
       ]
     },
     {
-      "label": "Verse 2",
+      "label": "Solo",
       "lines": [
-        { "lyrics": "Your skins alive", "chords": [] },
-        { "lyrics": "Pumping in your veins", "chords": [] },
-        { "lyrics": "You dance around", "chords": [] },
-        { "lyrics": "Even in the rain", "chords": [] }
-      ]
-    },
-    {
-      "label": "Chorus",
-      "lines": [
-        { "lyrics": "She loves Rock n roll radio", "chords": [] },
-        { "lyrics": "All night on the stereo", "chords": [] },
-        { "lyrics": "Rock it up", "chords": [] },
-        { "lyrics": "Flying high", "chords": [] },
-        { "lyrics": "Dancing in the dead of night", "chords": [] },
-        { "lyrics": "Give me Rock n roll radio", "chords": [] }
-      ]
-    },
-    {
-      "label": "Verse 3",
-      "lines": [
-        { "lyrics": "Come Take my hand", "chords": [] },
-        { "lyrics": "There’s nothing in our way", "chords": [] },
-        { "lyrics": "Let them pretend", "chords": [] },
-        { "lyrics": "Nothing they can say", "chords": [] }
-      ]
-    },
-    {
-      "label": "Verse 4",
-      "lines": [
-        { "lyrics": "Just turn it up", "chords": [] },
-        { "lyrics": "Like thunder in the sky", "chords": [] },
-        { "lyrics": "It’s all you know", "chords": [] },
-        { "lyrics": "It’s all you need to fly", "chords": [] }
-      ]
-    },
-    {
-      "label": "Chorus",
-      "lines": [
-        { "lyrics": "She loves Rock n roll radio", "chords": [] },
-        { "lyrics": "All night on the stereo", "chords": [] },
-        { "lyrics": "Rock it up", "chords": [] },
-        { "lyrics": "Take it high", "chords": [] },
-        { "lyrics": "Dancing in the dead of night", "chords": [] },
-        { "lyrics": "Give me Rock n roll radio", "chords": [] }
+        {
+          "type": "chords",
+          "chords": [
+            {
+              "chord": "A"
+            },
+            {
+              "chord": "E"
+            },
+            {
+              "chord": "A"
+            },
+            {
+              "chord": "E"
+            }
+          ],
+          "comment": "(x2)",
+          "lyrics": ""
+        }
       ]
     }
   ]
