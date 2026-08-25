@@ -953,7 +953,7 @@ body.is-dragging-active * {
 /* --- Toast Notification System --- */
 .toast-container {
   position: fixed;
-  bottom: 24px;
+  top: 24px;
   right: 24px;
   z-index: 10000;
   display: flex;
@@ -983,13 +983,13 @@ body.is-dragging-active * {
 
 .toast-item.toast-leaving {
   opacity: 0;
-  transform: translateY(12px) scale(0.95);
+  transform: translateY(-12px) scale(0.95);
 }
 
 @keyframes toastEnter {
   from {
     opacity: 0;
-    transform: translateY(16px) scale(0.95);
+    transform: translateY(-16px) scale(0.95);
   }
   to {
     opacity: 1;
@@ -1140,12 +1140,13 @@ body.modal-open {
   gap: 10px;
 }
 
-/* --- Teleprompter / Auto-Scroll Bar --- */
+/* --- Teleprompter / Auto-Scroll Bar (Docked at Bottom-Right to avoid covering footnotes) --- */
 .teleprompter-dock {
   position: fixed;
   bottom: 24px;
-  left: 50%;
-  transform: translateX(-50%);
+  right: 24px;
+  left: auto;
+  transform: none;
   z-index: 500;
   background: var(--header-bg);
   backdrop-filter: blur(20px) saturate(180%);
@@ -1162,8 +1163,8 @@ body.modal-open {
 }
 
 @keyframes dockSlideUp {
-  from { transform: translate(-50%, 30px); opacity: 0; }
-  to { transform: translate(-50%, 0); opacity: 1; }
+  from { transform: translateY(30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
 
 .teleprompter-btn {
