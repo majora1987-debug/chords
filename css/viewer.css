@@ -433,25 +433,7 @@
     color: var(--color-accent);
 }
 
-/* Notice for songs without chords */
-.no-chords-notice {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    background: var(--color-warning-bg);
-    border: 1px solid rgba(245, 158, 11, 0.3);
-    color: var(--color-text);
-    padding: 0.75rem 1.25rem;
-    border-radius: var(--radius);
-    margin-bottom: 1.25rem;
-    font-size: 0.9rem;
-    font-weight: 600;
-}
 
-.no-chords-notice p {
-    margin: 0;
-}
 
 /* Chord Chart Sheet Container */
 .chord-chart-container {

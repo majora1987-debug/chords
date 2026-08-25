@@ -35,8 +35,6 @@ document.addEventListener('DOMContentLoaded', () => {
         detailKey: document.getElementById('detail-key'),
         resetTransposeBtn: document.getElementById('reset-transpose-btn'),
         chordChart: document.getElementById('chord-chart'),
-        noChordsNotice: document.getElementById('no-chords-notice'),
-        editThisSongBtn: document.getElementById('edit-this-song-btn'),
 
         // Transpose
         transposeUpBtn: document.getElementById('transpose-up'),
@@ -416,16 +414,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         elements.transposeIndicator.textContent = state.currentTranspose > 0 ? `+${state.currentTranspose}` : state.currentTranspose;
-
-        // Check if song has chords
-        const stats = window.ChordUtils ? window.ChordUtils.getSongStats(state.currentSong) : null;
-        if (stats && !stats.hasChords) {
-            elements.noChordsNotice.classList.remove('hidden');
-            if (elements.editThisSongBtn) {
-                elements.editThisSongBtn.href = `editor.html`;
-            }
-        } else {
-            elements.noChordsNotice.classList.add('hidden');
+        if (state.currentTranspose === 0 && effectiveKey) {
+            elements.resetTransposeBtn.classList.add('hidden');
         }
 
         // Render Chart
