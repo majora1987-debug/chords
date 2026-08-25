@@ -4,7 +4,7 @@
   "key": "",
   "sections": [
     {
-      "label": "Verse 1",
+      "label": "",
       "lines": [
         {
           "lyrics": "Struggling to stand",
@@ -17,12 +17,7 @@
         {
           "lyrics": "Went right to plan",
           "chords": []
-        }
-      ]
-    },
-    {
-      "label": "Verse 2",
-      "lines": [
+        },
         {
           "lyrics": "Now I lay on a bench",
           "chords": []
