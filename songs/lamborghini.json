@@ -1,14 +1,29 @@
 {
   "title": "Lamborghini",
   "artist": "The Red Ram",
-  "key": "",
+  "key": "E",
   "sections": [
     {
       "label": "",
       "lines": [
         {
+          "type": "chords",
+          "chords": [
+            {
+              "chord": "B"
+            }
+          ],
+          "comment": "",
+          "lyrics": ""
+        },
+        {
           "lyrics": "There's a little green man",
-          "chords": []
+          "chords": [
+            {
+              "wordIndex": 0,
+              "chord": "B"
+            }
+          ]
         },
         {
           "lyrics": "Somewhere in my head",
@@ -24,11 +39,21 @@
         },
         {
           "lyrics": "Get off my back",
-          "chords": []
+          "chords": [
+            {
+              "wordIndex": 0,
+              "chord": "Asus4"
+            }
+          ]
         },
         {
           "lyrics": "You don't know my name",
-          "chords": []
+          "chords": [
+            {
+              "wordIndex": 0,
+              "chord": "E"
+            }
+          ]
         },
         {
           "lyrics": "I'm not like you",
@@ -36,11 +61,38 @@
         },
         {
           "lyrics": "I'm not the same",
-          "chords": []
+          "chords": [
+            {
+              "wordIndex": 2,
+              "chord": "D"
+            },
+            {
+              "wordIndex": 3,
+              "chord": "A"
+            }
+          ]
+        },
+        {
+          "lyrics": "Hey! Hey! Hey! Hey!",
+          "chords": [
+            {
+              "wordIndex": 0,
+              "chord": "B"
+            }
+          ]
         },
         {
           "lyrics": "You'll never have a Lamborghini",
-          "chords": []
+          "chords": [
+            {
+              "wordIndex": 0,
+              "chord": "A"
+            },
+            {
+              "wordIndex": 1,
+              "chord": "B"
+            }
+          ]
         },
         {
           "lyrics": "That's what, he said to me",
