@@ -261,7 +261,6 @@
 .song-card {
     background: var(--color-surface-card);
     border: 1px solid var(--color-border);
-    border-left: 3px solid transparent;
     border-radius: var(--radius);
     padding: 16px 20px;
     display: flex;
@@ -274,9 +273,9 @@
 
 .song-card:hover {
     transform: translateY(-2px);
-    border-color: var(--color-border);
-    border-left-color: var(--color-accent);
+    border-color: var(--color-accent);
     box-shadow: var(--shadow-md);
+    background-color: var(--color-surface-hover);
 }
 
 .song-card-actions {
