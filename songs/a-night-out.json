@@ -1,14 +1,19 @@
 {
   "title": "A Night Out",
   "artist": "The Red Ram",
-  "key": "",
+  "key": "D",
   "sections": [
     {
       "label": "",
       "lines": [
         {
           "lyrics": "Here comes that feeling again",
-          "chords": []
+          "chords": [
+            {
+              "wordIndex": 0,
+              "chord": "Am"
+            }
+          ]
         },
         {
           "lyrics": "Woke up on a doorstep",
@@ -20,20 +25,55 @@
         },
         {
           "lyrics": "I’m ok, where am I now?",
-          "chords": []
+          "chords": [
+            {
+              "wordIndex": 0,
+              "chord": "D"
+            }
+          ]
         },
         {
           "lyrics": "It’s daylight, think I need another can",
-          "chords": []
-        }
-      ]
-    },
-    {
-      "label": "",
-      "lines": [
+          "chords": [
+            {
+              "wordIndex": 0,
+              "chord": "Am"
+            }
+          ]
+        },
+        {
+          "type": "chords",
+          "chords": [
+            {
+              "chord": "G"
+            },
+            {
+              "chord": "Db"
+            },
+            {
+              "chord": "C"
+            },
+            {
+              "chord": "A"
+            },
+            {
+              "chord": "G"
+            },
+            {
+              "chord": "A"
+            }
+          ],
+          "comment": "x3",
+          "lyrics": ""
+        },
         {
           "lyrics": "Heads all hazy",
-          "chords": []
+          "chords": [
+            {
+              "wordIndex": 0,
+              "chord": "Am"
+            }
+          ]
         },
         {
           "lyrics": "I remember now",
@@ -49,7 +89,12 @@
         },
         {
           "lyrics": "Now I head to the station",
-          "chords": []
+          "chords": [
+            {
+              "wordIndex": 0,
+              "chord": "D"
+            }
+          ]
         },
         {
           "lyrics": "Struggling to stand",
@@ -62,12 +107,32 @@
         {
           "lyrics": "Went right to plan",
           "chords": []
-        }
-      ]
-    },
-    {
-      "label": "",
-      "lines": [
+        },
+        {
+          "type": "chords",
+          "chords": [
+            {
+              "chord": "G"
+            },
+            {
+              "chord": "Db"
+            },
+            {
+              "chord": "C"
+            },
+            {
+              "chord": "A"
+            },
+            {
+              "chord": "G"
+            },
+            {
+              "chord": "A"
+            }
+          ],
+          "comment": "x3",
+          "lyrics": ""
+        },
         {
           "lyrics": "Now I lay on a bench",
           "chords": []
@@ -99,6 +164,56 @@
         {
           "lyrics": "No one remembers you",
           "chords": []
+        },
+        {
+          "type": "chords",
+          "chords": [
+            {
+              "chord": "G"
+            },
+            {
+              "chord": "C#"
+            },
+            {
+              "chord": "C"
+            },
+            {
+              "chord": "A"
+            },
+            {
+              "chord": "G"
+            },
+            {
+              "chord": "A"
+            }
+          ],
+          "comment": "x3",
+          "lyrics": ""
+        },
+        {
+          "type": "chords",
+          "chords": [
+            {
+              "chord": "D"
+            },
+            {
+              "chord": "Db"
+            },
+            {
+              "chord": "C"
+            },
+            {
+              "chord": "A"
+            },
+            {
+              "chord": "Ab"
+            },
+            {
+              "chord": "G"
+            }
+          ],
+          "comment": "x3",
+          "lyrics": ""
         }
       ]
     }
