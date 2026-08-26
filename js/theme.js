@@ -12,6 +12,12 @@
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('redram-theme', theme);
 
+    // Update meta theme-color tag for smooth browser and mobile status bar integration
+    const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+    if (metaThemeColor) {
+      metaThemeColor.setAttribute('content', theme === 'dark' ? '#080d1a' : '#fcf9f2');
+    }
+
     // Update all theme toggle buttons on the page
     const toggleBtns = document.querySelectorAll('.theme-toggle-btn');
     toggleBtns.forEach(btn => {

@@ -4,8 +4,8 @@
   "description": "Band chord charts, lyrics, and teleprompter for The Red Ram",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#090d16",
-  "theme_color": "#e11d48",
+  "background_color": "#080d1a",
+  "theme_color": "#d91e44",
   "orientation": "any",
   "icons": [
     {

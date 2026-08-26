@@ -75,7 +75,7 @@
 .auth-error-msg {
     margin-top: 12px;
     font-size: 0.85rem;
-    color: #ef4444;
+    color: var(--color-error);
     font-weight: 600;
     animation: shake 0.3s ease-in-out;
 }
@@ -111,17 +111,17 @@
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: #94a3b8;
+    background: var(--color-text-muted);
 }
 
 .status-dot.connected {
     background: var(--color-success);
-    box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
+    box-shadow: 0 0 6px var(--color-success);
 }
 
 .status-dot.disconnected {
     background: var(--color-warning);
-    box-shadow: 0 0 6px rgba(245, 158, 11, 0.6);
+    box-shadow: 0 0 6px var(--color-warning);
 }
 
 /* Settings Modal & Form Row */
