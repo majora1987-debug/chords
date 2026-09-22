@@ -15,6 +15,13 @@
       "artist": "The Red Ram"
     },
     {
+      "title": "Great Southern Land",
+      "slug": "great-southern-land",
+      "key": "B",
+      "file": "songs/great-southern-land.json",
+      "artist": "The Red Ram"
+    },
+    {
       "title": "Icebreaker",
       "slug": "icebreaker",
       "key": "C",
